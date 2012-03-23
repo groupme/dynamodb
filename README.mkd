@@ -1,0 +1,25 @@
+Jedlik
+======
+
+Communicate with *Amazon DynamoDB* in Ruby. Raw access to the full API without
+having to handle temporary credentials or HTTP requests by yourself.
+
+Does not require the AWS gem.  
+Requires **Typhoeus**.
+
+Usage
+-----
+
+Jedlik maps the DynamoDB API closely. Once the connection object is ready, all
+requests are done through `#post`. The first argument is the name of the
+operation, the second is a hash that will be converted to JSON and used as the
+request body.
+
+    require 'jedlik'
+
+    conn = Jedlik::Connection.new 'DG7I54_KEY_ID', 'wr31PP+hu5d76+SECRET_KEY'
+
+    conn.post :ListTables    # => {"TableNames"=>["table1", "table2"]}
+
+    conn.post :GetItem, {:TableName => "table1", :Key => {:S => "foo"}}
+    # => Hash
