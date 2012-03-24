@@ -35,7 +35,7 @@ module Jedlik
       response = request.response
 
       if status_ok?(response)
-        JSON.parse(response.body)
+        Yajl::Parser.parse(response.body)
       end
     end
 
@@ -63,7 +63,7 @@ module Jedlik
       when 200
         true
       when 400..499
-        js = JSON.parse(response.body)
+        js = Yajl::Parser.parse(response.body)
         raise ClientError, "#{js['__type'].match(/#(.+)\Z/)[1]}: #{js["message"]}"
       when 500..599
         raise ServerError

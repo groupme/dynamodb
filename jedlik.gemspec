@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.homepage     = 'http://github.com/hashmal/jedlik'
 
   s.add_runtime_dependency 'typhoeus'
-  s.add_runtime_dependency 'json'
+  s.add_runtime_dependency 'yajl-ruby'
   
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'webmock'
