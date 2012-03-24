@@ -40,6 +40,15 @@ module Jedlik
     def signature
       sign(string_to_sign)
     end
+    
+    def string_to_sign
+      [
+        "POST",
+        "sts.amazonaws.com",
+        "/",
+        "AWSAccessKeyId=#{@_access_key_id}&Action=GetSessionToken&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
+      ].join("\n")
+    end
 
     private
 
@@ -84,15 +93,6 @@ module Jedlik
         :Timestamp        => Time.now.utc.iso8601,
         :Version          => '2011-06-15'
       }
-    end
-
-    def string_to_sign
-      [
-        "POST",
-        "sts.amazonaws.com",
-        "/",
-        "Action=GetSessionToken&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
-      ].join("\n")
     end
 
     # Sign (HMAC-SHA256) a string using the secret key given at
