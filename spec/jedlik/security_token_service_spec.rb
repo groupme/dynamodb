@@ -18,48 +18,25 @@ VALID_RESPONSE_BODY = "<GetSessionTokenResponse " +
 
 module Jedlik
   describe SecurityTokenService do
-    let(:sts){SecurityTokenService.new "access_key_id", "secret_access_key"}
-    let(:response){(Typhoeus::Response.new body: VALID_RESPONSE_BODY)}
+    let(:sts) { SecurityTokenService.new("access_key_id", "secret_access_key") }
 
-    before{Typhoeus::Request.stub(:get).and_return response}
-
-    shared_examples_for 'cached' do |method|
-      it 'sends a request to Amazon STS at first call' do
-        Typhoeus::Request.should_receive(:get).and_return response
-        sts.send method
-      end
-
-      it 'signs the request'
-
-      it 'caches its value' do
-        Typhoeus::Request.should_receive(:get).and_return response
-        sts.send method
-        sts.send method
-      end
+    before do
+      Time.stub(:now).and_return(Time.parse("2012-03-24T20:03:36Z"))
+      OpenSSL::HMAC.stub!(:digest).and_return("sha256-hash") # base64 => c2hhMjU2LWhhc2g=
+      url = "https://sts.amazonaws.com/?AWSAccessKeyId=access_key_id&Action=GetSessionToken&DurationSeconds=3600&Signature=c2hhMjU2LWhhc2g=&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-03-24T20:03:36Z&Version=2011-06-15"
+      stub_request(:get, url).to_return(:status => 200, :body => VALID_RESPONSE_BODY)
     end
 
-    describe 'access_key_id' do
-      it_behaves_like 'cached', :access_key_id
-
-      it 'returns a value' do
-        sts.access_key_id.should == "ACCESS_KEY_ID"
-      end
+    it "returns access_key_id" do
+      sts.access_key_id.should == "ACCESS_KEY_ID"
     end
 
-    describe 'secret_access_key' do
-      it_behaves_like 'cached', :secret_access_key
-
-      it 'returns a value' do
-        sts.secret_access_key.should == "SECRET_ACCESS_KEY"
-      end
+    it "returns secret_access_key" do
+      sts.secret_access_key.should == "SECRET_ACCESS_KEY"
     end
 
-    describe 'session_token' do
-      it_behaves_like 'cached', :session_token
-
-      it 'returns a value' do
-        sts.session_token.should == "SESSION_TOKEN"
-      end
+    it "returns session_token" do
+      sts.session_token.should == "SESSION_TOKEN"
     end
   end
 end

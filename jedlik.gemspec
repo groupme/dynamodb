@@ -11,6 +11,9 @@ Gem::Specification.new do |s|
   s.files        = FileList['lib/**/*.rb', '[A-Z]*', 'spec/**/*'].to_a
   s.homepage     = 'http://github.com/hashmal/jedlik'
 
-  s.add_development_dependency 'rspec'
   s.add_runtime_dependency 'typhoeus'
+  s.add_runtime_dependency 'json'
+  
+  s.add_development_dependency 'rspec'
+  s.add_development_dependency 'webmock'
 end
