@@ -63,8 +63,7 @@ module Jedlik
       when 200
         true
       when 400..499
-        js = Yajl::Parser.parse(response.body)
-        raise ClientError, "#{js['__type'].match(/#(.+)\Z/)[1]}: #{js["message"]}"
+        raise ClientError, response.body
       when 500..599
         raise ServerError
       else
