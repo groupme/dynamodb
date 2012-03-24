@@ -37,6 +37,10 @@ module Jedlik
       @session_token
     end
 
+    def signature
+      sign(string_to_sign)
+    end
+
     private
 
     # Extract the contents of a given tag.
@@ -54,7 +58,14 @@ module Jedlik
     # expire.
     def obtain_credentials
       if not @expiration or @expiration <= Time.now.utc
-        response = Typhoeus::Request.get(request_uri)
+        params = {
+          :AWSAccessKeyId   => @_access_key_id,
+          :SignatureMethod  => 'HmacSHA256',
+          :SignatureVersion => '2',
+          :Signature        => signature
+        }.merge(authorization_params)
+
+        response = Typhoeus::Request.post("https://sts.amazonaws.com", :params => params)
         if response.success?
           body = response.body
           @session_token      = get_tag(:SessionToken, body)
@@ -67,34 +78,29 @@ module Jedlik
       end
     end
 
-    # Generate the params to be sent to STS.
-    def request_params
-      {
-        :AWSAccessKeyId   => @_access_key_id,
+    def authorization_params
+      @authorization_params ||= {
         :Action           => 'GetSessionToken',
-        :DurationSeconds  => '3600',
-        :SignatureMethod  => 'HmacSHA256',
-        :SignatureVersion => '2',
         :Timestamp        => Time.now.utc.iso8601,
-        :Version          => '2011-06-15',
+        :Version          => '2011-06-15'
       }
     end
 
-    # Generate the URI that should be requested.
-    def request_uri
-      qs = request_params.map { |key, val|
-        [CGI.escape(key.to_s), CGI.escape(val)].join('=')
-      }.join('&')
-
-      "https://sts.amazonaws.com/?#{qs}&Signature=" +
-      CGI.escape(sign("GET\nsts.amazonaws.com\n/\n#{qs}"))
+    def string_to_sign
+      [
+        "POST",
+        "sts.amazonaws.com",
+        "/",
+        "Action=GetSessionToken&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
+      ].join("\n")
     end
 
     # Sign (HMAC-SHA256) a string using the secret key given at
     # initialization.
     def sign(string)
-      digested = OpenSSL::HMAC.digest('sha256', @_secret_access_key, string)
-      Base64.encode64(digested).chomp
+      Base64.encode64(
+        OpenSSL::HMAC.digest('sha256', @_secret_access_key, string)
+      ).strip
     end
   end
 end

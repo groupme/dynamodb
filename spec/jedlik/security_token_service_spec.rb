@@ -5,9 +5,9 @@ VALID_RESPONSE_BODY = "<GetSessionTokenResponse " +
 <GetSessionTokenResult>
 <Credentials>
 <SessionToken>SESSION_TOKEN</SessionToken>
-<SecretAccessKey>SECRET_ACCESS_KEY</SecretAccessKey>
+<SecretAccessKey>secret_access_key</SecretAccessKey>
 <Expiration>2036-03-19T01:03:22.276Z</Expiration>
-<AccessKeyId>ACCESS_KEY_ID</AccessKeyId>
+<AccessKeyId>access_key_id</AccessKeyId>
 </Credentials>
 </GetSessionTokenResult>
 <ResponseMetadata>
@@ -21,18 +21,14 @@ module Jedlik
     let(:sts) { SecurityTokenService.new("access_key_id", "secret_access_key") }
 
     before do
-      Time.stub(:now).and_return(Time.parse("2012-03-24T20:03:36Z"))
-      OpenSSL::HMAC.stub!(:digest).and_return("sha256-hash") # base64 => c2hhMjU2LWhhc2g=
-      url = "https://sts.amazonaws.com/?AWSAccessKeyId=access_key_id&Action=GetSessionToken&DurationSeconds=3600&Signature=c2hhMjU2LWhhc2g=&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-03-24T20:03:36Z&Version=2011-06-15"
-      stub_request(:get, url).to_return(:status => 200, :body => VALID_RESPONSE_BODY)
+      Time.stub(:now).and_return(Time.parse("2012-03-24T21:11:02Z"))
+      stub_request(:post, "https://sts.amazonaws.com/").
+        with(:body => "AWSAccessKeyId=access_key_id&Action=GetSessionToken&Signature=Mna7q/X+GkaDJv7pmfrtIR83rdPKLogbawR2QVMPhxI=&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-03-24T21:11:02Z&Version=2011-06-15").
+        to_return(:status => 200, :body => VALID_RESPONSE_BODY)
     end
 
-    it "returns access_key_id" do
-      sts.access_key_id.should == "ACCESS_KEY_ID"
-    end
-
-    it "returns secret_access_key" do
-      sts.secret_access_key.should == "SECRET_ACCESS_KEY"
+    it "computes proper signature" do
+      sts.signature.should == "Mna7q/X+GkaDJv7pmfrtIR83rdPKLogbawR2QVMPhxI="
     end
 
     it "returns session_token" do

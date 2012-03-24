@@ -15,7 +15,7 @@ module Jedlik
     #
     def initialize(access_key_id, secret_access_key, opts={})
       opts = DEFAULTS.merge opts
-      @sts = SecurityTokenService.new access_key_id, secret_access_key
+      @sts = SecurityTokenService.new(access_key_id, secret_access_key)
       @endpoint = opts[:endpoint]
     end
 
