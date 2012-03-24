@@ -1,5 +1,3 @@
-require 'rake'
-
 Gem::Specification.new do |s|
   s.name         = 'jedlik'
   s.version      = '0.0.1'
