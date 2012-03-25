@@ -17,6 +17,7 @@ module Jedlik
       opts = DEFAULTS.merge opts
       @sts = SecurityTokenService.new(access_key_id, secret_access_key)
       @endpoint = opts[:endpoint]
+      @debug = opts[:debug]
     end
 
     # Create and send a request to DynamoDB.
@@ -28,14 +29,17 @@ module Jedlik
     # http://docs.amazonwebservices.com/amazondynamodb/latest/developerguide
     #
     def post(operation, data={})
-      request = new_request(operation, data.to_json)
+      request = new_request(operation, Yajl::Encoder.encode(data))
       request.sign(sts)
       hydra.queue(request)
       hydra.run
       response = request.response
+      puts response.inspect if @debug
 
-      if status_ok?(response)
+      if response.code == 200
         Yajl::Parser.parse(response.body)
+      else
+        raise_error(response)
       end
     end
 
@@ -58,16 +62,14 @@ module Jedlik
         }
     end
 
-    def status_ok?(response)
+    def raise_error(response)
       case response.code
-      when 200
-        true
       when 400..499
         raise ClientError, response.body
       when 500..599
-        raise ServerError
+        raise ServerError, response.code
       else
-        false
+        raise Exception, response.body
       end
     end
   end

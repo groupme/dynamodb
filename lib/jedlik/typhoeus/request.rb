@@ -5,7 +5,7 @@ module Typhoeus
         'x-amzn-authorization' => [
           "AWS3 AWSAccessKeyId=#{sts.access_key_id}",
           "Algorithm=HmacSHA256",
-          "Signature=#{digest sts.secret_access_key}"
+          "Signature=#{digest(sts.secret_access_key)}"
         ].join(',')
       }
       headers.merge!(auth)
