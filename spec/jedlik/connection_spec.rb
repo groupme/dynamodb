@@ -2,6 +2,12 @@ require 'spec_helper'
 require 'benchmark'
 
 describe Jedlik::Connection do
+  it "raises an error when no credentials are supplied" do
+    lambda {
+      Jedlik::Connection.new(nil, nil)
+    }.should raise_error
+  end
+  
   describe "#post" do
     before do
       Time.stub!(:now).and_return(Time.at(1332635893)) # Sat Mar 24 20:38:13 -0400 2012

@@ -14,6 +14,7 @@ module Jedlik
     #               # Default: 'dynamodb.us-east-1.amazonaws.com'
     #
     def initialize(access_key_id, secret_access_key, opts={})
+      raise ArgumentError.new("access_key_id and secret_access_key are required") unless access_key_id && secret_access_key
       opts = DEFAULTS.merge opts
       @sts = SecurityTokenService.new(access_key_id, secret_access_key)
       @endpoint = opts[:endpoint]
