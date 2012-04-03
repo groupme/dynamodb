@@ -12,4 +12,5 @@ module Jedlik
   require 'jedlik/typhoeus/request'
   require 'jedlik/security_token_service'
   require 'jedlik/connection'
+  require 'jedlik/query_response'
 end

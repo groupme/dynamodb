@@ -17,7 +17,6 @@ module Jedlik
       opts = DEFAULTS.merge opts
       @sts = SecurityTokenService.new(access_key_id, secret_access_key)
       @endpoint = opts[:endpoint]
-      @debug = opts[:debug]
     end
 
     # Create and send a request to DynamoDB.
@@ -34,10 +33,13 @@ module Jedlik
       hydra.queue(request)
       hydra.run
       response = request.response
-      puts response.inspect if @debug
 
       if response.code == 200
-        Yajl::Parser.parse(response.body)
+        if operation == :Query
+          Jedlik::QueryResponse.new(response)
+        else
+          Yajl::Parser.parse(response.body)
+        end
       else
         raise_error(response)
       end
