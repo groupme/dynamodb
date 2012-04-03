@@ -15,23 +15,27 @@ module Jedlik
   require 'jedlik/query_response'
 
   class << self
-    def serialize(hash)
-      serialized = {}
-      hash.each do |k, v|
-        serialized[k.to_s] = encode_type(v)
+    def serialize(object)
+      if object.kind_of?(Hash)
+        serialized = {}
+        object.each do |k, v|
+          serialized[k.to_s] = encode_type(v)
+        end
+        serialized
+      else
+        encode_type(object)
       end
-      serialized
     end
 
-    def deserialize(item)
-      if item.values.first.kind_of?(Hash)
+    def deserialize(object)
+      if object.values.first.kind_of?(Hash)
         deserialized = {}
-        item.each do |k, value_hash|
+        object.each do |k, value_hash|
           deserialized[k] = decode_type(value_hash)
         end
         deserialized
       else
-        decode_type(item)
+        decode_type(object)
       end
     end
 

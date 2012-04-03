@@ -20,6 +20,12 @@ describe Jedlik do
         "active" => {"N" => "1"}
       }
     end
+
+    it "serializes a single value" do
+      Jedlik.serialize(1).should == {"N" => "1"}
+      Jedlik.serialize(1.5).should == {"N" => "1.5"}
+      Jedlik.serialize("Hello World").should == {"S" => "Hello World"}
+    end
   end
 
   describe "#deserialize" do
