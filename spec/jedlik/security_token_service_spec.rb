@@ -22,20 +22,27 @@ module Jedlik
 
     before do
       Time.stub(:now).and_return(Time.parse("2012-03-24T22:10:38Z"))
-      stub_request(:post, "https://sts.amazonaws.com/").
-        with(:body => "AWSAccessKeyId=access_key_id&Action=GetSessionToken&Signature=ybtIr0mrJ28uJFYMMNi+bLANvIDD7tAh6F97JGgtvDw=&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-03-24T22:10:38Z&Version=2011-06-15").
-        to_return(:status => 200, :body => VALID_RESPONSE_BODY)
+      stub_request(:get, "https://sts.amazonaws.com/").
+        with(:query => {
+          "AWSAccessKeyId"   => "access_key_id",
+          "Action"           => "GetSessionToken",
+          "Signature"        => "8h1VJkZsuVP3y+BkqwABrFBgTuTCUNHcHPZPARfQHJw=",
+          "SignatureMethod"  => "HmacSHA256",
+          "SignatureVersion" => "2",
+          "Timestamp"        => "2012-03-24T22:10:38Z",
+          "Version"          => "2011-06-15"
+        }).to_return(:status => 200, :body => VALID_RESPONSE_BODY)
     end
 
     it "computes proper signature" do
       s = SecurityTokenService.new("access_key_id", "secret_access_key")
       s.string_to_sign.should == [
-        "POST",
+        "GET",
         "sts.amazonaws.com",
         "/",
         "AWSAccessKeyId=access_key_id&Action=GetSessionToken&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=2012-03-24T22%3A10%3A38Z&Version=2011-06-15"
       ].join("\n")
-      s.signature.should == "ybtIr0mrJ28uJFYMMNi+bLANvIDD7tAh6F97JGgtvDw="
+      s.signature.should == "8h1VJkZsuVP3y+BkqwABrFBgTuTCUNHcHPZPARfQHJw="
     end
 
     it "returns session_token" do
