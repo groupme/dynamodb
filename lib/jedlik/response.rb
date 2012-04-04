@@ -1,6 +1,5 @@
 module Jedlik
-  class QueryResponse
-    include Enumerable
+  class Response
     attr_reader :typhoeus_response
 
     def initialize(typhoeus_response)
@@ -15,19 +14,17 @@ module Jedlik
       Jedlik.deserialize(json["LastEvaluatedKey"]["RangeKeyElement"])
     end
 
-    def [](index)
-      items[index]
+    def item
+      return unless json["Item"]
+      @item ||= Jedlik.deserialize(json["Item"])
     end
-
-    def each(&block)
-      items.each(&block)
-    end
-
-    private
 
     def items
+      return unless json["Items"]
       @items ||= json["Items"].map { |i| Jedlik.deserialize(i) }
     end
+    
+    private
 
     def json
       @json ||= Yajl::Parser.parse(typhoeus_response.body)

@@ -36,8 +36,9 @@ module Jedlik
       response = request.response
 
       if response.code == 200
-        if operation == :Query
-          Jedlik::QueryResponse.new(response)
+        case operation
+        when :Query, :Scan, :GetItem
+          Jedlik::Response.new(response)
         else
           Yajl::Parser.parse(response.body)
         end

@@ -46,7 +46,7 @@ describe Jedlik::Connection do
       result.should == {"TableNames" => ["example"]}
     end
 
-    it "type casts response" do
+    it "type casts response when Query" do
       stub_request(:post, @url).
         to_return(
           :status => 200,
@@ -56,7 +56,20 @@ describe Jedlik::Connection do
 
       connection = Jedlik::Connection.new("key_id", "secret")
       response = connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
-      response.should be_a_kind_of(Jedlik::QueryResponse)
+      response.should be_a_kind_of(Jedlik::Response)
+    end
+
+    it "type casts response when GetItem" do
+      stub_request(:post, @url).
+        to_return(
+          :status => 200,
+          :body => "{}",
+          :headers => {}
+        )
+
+      connection = Jedlik::Connection.new("key_id", "secret")
+      response = connection.post :GetItem, :TableName => "people", :Key => {:HashKeyElement => {:N => "1"}, :RangeKeyElement => {:N => 2}}
+      response.should be_a_kind_of(Jedlik::Response)
     end
   end
 end
