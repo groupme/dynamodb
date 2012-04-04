@@ -26,6 +26,11 @@ describe Jedlik do
       Jedlik.serialize(1.5).should == {"N" => "1.5"}
       Jedlik.serialize("Hello World").should == {"S" => "Hello World"}
     end
+
+    it "omits nil/blank values" do
+      Jedlik.serialize("foo" => nil).should == {}
+      Jedlik.serialize("foo" => "").should == {}
+    end
   end
 
   describe "#deserialize" do

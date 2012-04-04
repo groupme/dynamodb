@@ -19,6 +19,7 @@ module Jedlik
       if object.kind_of?(Hash)
         serialized = {}
         object.each do |k, v|
+          next if blank?(v)
           serialized[k.to_s] = encode_type(v)
         end
         serialized
@@ -40,6 +41,14 @@ module Jedlik
     end
 
     private
+
+    def blank?(object)
+      if object.respond_to?(:empty?)
+        object.empty?
+      else
+        object.nil?
+      end
+    end
 
     def encode_type(value)
       case value
