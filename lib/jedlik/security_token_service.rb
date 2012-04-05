@@ -1,4 +1,7 @@
 module Jedlik
+  attr_writer :access_key_id
+  attr_writer :secret_acces_key
+  attr_writer :session_token
 
   # SecurityTokenService automatically manages the creation and renewal of
   # temporary AWS credentials.
@@ -11,7 +14,6 @@ module Jedlik
   #     credentials.session_token     # => String
   #
   class SecurityTokenService
-
     # A SecurityTokenService is initialized for a single AWS user using his
     # credentials.
     def initialize(access_key_id, secret_access_key)
@@ -37,10 +39,17 @@ module Jedlik
       @session_token
     end
 
+    def refresh_credentials
+      @expiration = nil
+      obtain_credentials
+    end
+
+    private
+
     def signature
       sign(string_to_sign)
     end
-    
+
     def string_to_sign
       [
         "GET",
@@ -49,8 +58,6 @@ module Jedlik
         "AWSAccessKeyId=#{@_access_key_id}&Action=GetSessionToken&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
       ].join("\n")
     end
-
-    private
 
     # Extract the contents of a given tag.
     def get_tag(tag, string)
@@ -82,7 +89,7 @@ module Jedlik
           @expiration         = Time.parse(get_tag(:Expiration, body))
           @access_key_id      = get_tag(:AccessKeyId, body)
         else
-          raise "credential errors: #{response.inspect}"
+          raise Jedlik::AuthenticationError.new(response.inspect)
         end
       end
     end

@@ -2,12 +2,6 @@ require 'spec_helper'
 require 'benchmark'
 
 describe Jedlik::Connection do
-  it "raises an error when no credentials are supplied" do
-    lambda {
-      Jedlik::Connection.new(nil, nil)
-    }.should raise_error
-  end
-  
   describe "#post" do
     before do
       Time.stub!(:now).and_return(Time.at(1332635893)) # Sat Mar 24 20:38:13 -0400 2012
@@ -70,6 +64,80 @@ describe Jedlik::Connection do
       connection = Jedlik::Connection.new("key_id", "secret")
       response = connection.post :GetItem, :TableName => "people", :Key => {:HashKeyElement => {:N => "1"}, :RangeKeyElement => {:N => 2}}
       response.should be_a_kind_of(Jedlik::Response)
+    end
+
+    context "on authentication failure" do
+      it "raises an AuthenticationError" do
+        stub_request(:post, @url).
+          to_return(
+            :status => 403,
+            :body => "{}",
+            :headers => {}
+          )
+
+        connection = Jedlik::Connection.new("key_id", "secret")
+        proc {
+          connection.post :GetItem, :TableName => "people", :Key => {:HashKeyElement => {:N => "1"}, :RangeKeyElement => {:N => 2}}
+        }.should raise_error(Jedlik::AuthenticationError)
+      end
+    end
+  end
+
+  describe "#authenticate" do
+    it "refreshes session credentials" do
+      mock_service = mock(Jedlik::SecurityTokenService)
+      Jedlik::SecurityTokenService.stub!(:new).and_return(mock_service)
+      mock_service.should_receive(:refresh_credentials)
+
+      connection = Jedlik::Connection.new("key_id", "secret")
+      connection.authenticate
+    end
+  end
+
+  describe "#credentials" do
+    before do
+      mock_service = mock(Jedlik::SecurityTokenService,
+        :session_token => "session_token",
+        :access_key_id => "access_key_id",
+        :secret_access_key => "secret_access_key"
+      )
+      Jedlik::SecurityTokenService.stub!(:new).and_return(mock_service)
+    end
+
+    it "returns the session_token" do
+      connection = Jedlik::Connection.new("key_id", "secret")
+      connection.credentials.should == {
+        :session_token => "session_token",
+        :access_key_id => "access_key_id",
+        :secret_access_key => "secret_access_key"
+      }
+    end
+  end
+
+  describe "#credentials=" do
+    before do
+      @mock_service = mock(Jedlik::SecurityTokenService)
+      Jedlik::SecurityTokenService.stub!(:new).and_return(@mock_service)
+    end
+
+    it "sets credentials on STS" do
+      connection = Jedlik::Connection.new("key_id", "secret")
+      @mock_service.should_receive(:access_key_id=).with("access_key_id")
+      @mock_service.should_receive(:secret_access_key=).with("secret_access_key")
+      @mock_service.should_receive(:session_token=).with("session_token")
+
+      connection.credentials = {
+        :access_key_id => "access_key_id",
+        :secret_access_key => "secret_access_key",
+        :session_token => "session_token"
+      }
+    end
+
+    it "raises an ArgumentError with bad arguments" do
+      connection = Jedlik::Connection.new("key_id", "secret")
+      proc {
+        connection.credentials = {"foo" => "bar"}
+      }.should raise_error(ArgumentError)
     end
   end
 end

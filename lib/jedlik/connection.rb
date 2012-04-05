@@ -43,8 +43,34 @@ module Jedlik
           Yajl::Parser.parse(response.body)
         end
       else
-        raise_error(response)
+        if response.code == 403
+          raise AuthenticationError
+        else
+          raise_error(response)
+        end
       end
+    end
+
+    def credentials
+      {
+        :access_key_id      => @sts.access_key_id,
+        :secret_access_key  => @sts.secret_access_key,
+        :session_token      => @sts.session_token
+      }
+    end
+
+    def credentials=(hash)
+      raise ArgumentError unless hash.key?(:access_key_id) &&
+                                 hash.key?(:secret_access_key) &&
+                                 hash.key?(:session_token)
+
+      @sts.access_key_id = hash[:access_key_id]
+      @sts.secret_access_key = hash[:secret_access_key]
+      @sts.session_token = hash[:session_token]
+    end
+
+    def authenticate
+      @sts.refresh_credentials
     end
 
     private
