@@ -44,7 +44,7 @@ module Jedlik
         end
       else
         if response.code == 403
-          raise AuthenticationError
+          authenticate
         else
           raise_error(response)
         end

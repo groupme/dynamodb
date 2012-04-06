@@ -67,18 +67,18 @@ describe Jedlik::Connection do
     end
 
     context "on authentication failure" do
-      it "raises an AuthenticationError" do
+      it "reauthenticates" do
+        @headers['X-Amz-Target'] = 'DynamoDB_20111205.ListTables'
         stub_request(:post, @url).
-          to_return(
-            :status => 403,
-            :body => "{}",
-            :headers => {}
-          )
+          with(
+            :body     => "{}",
+            :headers  => @headers
+          ).
+          to_return(:status => 403)
 
         connection = Jedlik::Connection.new("key_id", "secret")
-        proc {
-          connection.post :GetItem, :TableName => "people", :Key => {:HashKeyElement => {:N => "1"}, :RangeKeyElement => {:N => 2}}
-        }.should raise_error(Jedlik::AuthenticationError)
+        connection.should_receive(:authenticate)
+        connection.post :ListTables
       end
     end
   end
