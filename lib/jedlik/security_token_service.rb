@@ -73,24 +73,22 @@ module Jedlik
     # credentials were previously obtained, no request is made until they
     # expire.
     def obtain_credentials
-      if not @expiration or @expiration <= Time.now.utc
-        params = {
-          :AWSAccessKeyId   => @_access_key_id,
-          :SignatureMethod  => 'HmacSHA256',
-          :SignatureVersion => '2',
-          :Signature        => signature
-        }.merge(authorization_params)
+      params = {
+        :AWSAccessKeyId   => @_access_key_id,
+        :SignatureMethod  => 'HmacSHA256',
+        :SignatureVersion => '2',
+        :Signature        => signature
+      }.merge(authorization_params)
 
-        response = Typhoeus::Request.get("https://sts.amazonaws.com", :params => params)
-        if response.success?
-          body = response.body
-          @session_token      = get_tag(:SessionToken, body)
-          @secret_access_key  = get_tag(:SecretAccessKey, body)
-          @expiration         = Time.parse(get_tag(:Expiration, body))
-          @access_key_id      = get_tag(:AccessKeyId, body)
-        else
-          raise Jedlik::AuthenticationError.new(response.inspect)
-        end
+      response = Typhoeus::Request.get("https://sts.amazonaws.com", :params => params)
+      if response.success?
+        body = response.body
+        @session_token      = get_tag(:SessionToken, body)
+        @secret_access_key  = get_tag(:SecretAccessKey, body)
+        @expiration         = Time.parse(get_tag(:Expiration, body))
+        @access_key_id      = get_tag(:AccessKeyId, body)
+      else
+        raise Jedlik::AuthenticationError.new(response.inspect)
       end
     end
 
@@ -98,7 +96,8 @@ module Jedlik
       {
         :Action           => 'GetSessionToken',
         :Timestamp        => Time.now.utc.iso8601,
-        :Version          => '2011-06-15'
+        :Version          => '2011-06-15',
+        :DurationSeconds  => 129600 # 36 hour expiration
       }
     end
 

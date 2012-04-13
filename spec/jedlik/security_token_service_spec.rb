@@ -31,7 +31,8 @@ module Jedlik
             "SignatureMethod"  => "HmacSHA256",
             "SignatureVersion" => "2",
             "Timestamp"        => "2012-03-24T22:10:38Z",
-            "Version"          => "2011-06-15"
+            "Version"          => "2011-06-15",
+            "DurationSeconds"  => "129600"
           }).to_return(:status => 200, :body => success_body)
       end
 
@@ -65,7 +66,8 @@ module Jedlik
             "SignatureMethod"  => "HmacSHA256",
             "SignatureVersion" => "2",
             "Timestamp"        => "2012-03-24T22:10:38Z",
-            "Version"          => "2011-06-15"
+            "Version"          => "2011-06-15",
+            "DurationSeconds"  => "129600"
           }).to_return(:status => 403, :body => error_body)
       end
 
