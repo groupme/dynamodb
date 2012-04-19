@@ -55,7 +55,7 @@ module Jedlik
         "GET",
         "sts.amazonaws.com",
         "/",
-        "AWSAccessKeyId=#{@_access_key_id}&Action=GetSessionToken&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
+        "AWSAccessKeyId=#{@_access_key_id}&Action=GetSessionToken&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15&DurationSeconds=129600"
       ].join("\n")
     end
 
