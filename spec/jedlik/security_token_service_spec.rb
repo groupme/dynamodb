@@ -23,7 +23,7 @@ module Jedlik
           </GetSessionTokenResponse>
         XML
 
-        stub_request(:get, "https://sts.amazonaws.com/").
+        @request = stub_request(:get, "https://sts.amazonaws.com/").
           with(:query => {
             "AWSAccessKeyId"   => "access_key_id",
             "Action"           => "GetSessionToken",
@@ -41,6 +41,20 @@ module Jedlik
         sts.access_key_id.should == "access_key_id"
         sts.secret_access_key.should == "secret_access_key"
         sts.session_token.should == "session_token"
+      end
+
+      it "does not query STS if the credentials are not expired" do
+        sts = SecurityTokenService.new("access_key_id", "secret_access_key")
+
+        sts.stub(:credentials_expired?).and_return(true)
+        sts.access_key_id
+        @request.should have_been_requested
+
+        WebMock.reset!
+
+        sts.stub(:credentials_expired?).and_return(false)
+        sts.access_key_id
+        @request.should_not have_been_requested
       end
     end
 

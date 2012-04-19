@@ -14,6 +14,8 @@ module Jedlik
   #     credentials.session_token     # => String
   #
   class SecurityTokenService
+    THIRTY_SIX_HOURS = 129600
+
     # A SecurityTokenService is initialized for a single AWS user using his
     # credentials.
     def initialize(access_key_id, secret_access_key)
@@ -55,7 +57,7 @@ module Jedlik
         "GET",
         "sts.amazonaws.com",
         "/",
-        "AWSAccessKeyId=#{@_access_key_id}&Action=GetSessionToken&DurationSeconds=129600&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
+        "AWSAccessKeyId=#{@_access_key_id}&Action=GetSessionToken&DurationSeconds=#{THIRTY_SIX_HOURS}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
       ].join("\n")
     end
 
@@ -73,7 +75,7 @@ module Jedlik
     # credentials were previously obtained, no request is made until they
     # expire.
     def obtain_credentials
-      return if @expiration && @expiration >= Time.now.utc
+      return unless credentials_expired?
 
       params = {
         :AWSAccessKeyId   => @_access_key_id,
@@ -99,7 +101,7 @@ module Jedlik
         :Action           => 'GetSessionToken',
         :Timestamp        => Time.now.utc.iso8601,
         :Version          => '2011-06-15',
-        :DurationSeconds  => 129600 # 36 hour expiration
+        :DurationSeconds  => THIRTY_SIX_HOURS # 36 hour expiration
       }
     end
 
@@ -109,6 +111,10 @@ module Jedlik
       Base64.encode64(
         OpenSSL::HMAC.digest('sha256', @_secret_access_key, string)
       ).strip
+    end
+
+    def credentials_expired?
+      @expiration.nil? || @expiration <= Time.now.utc
     end
   end
 end
