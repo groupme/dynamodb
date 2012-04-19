@@ -27,7 +27,7 @@ module Jedlik
           with(:query => {
             "AWSAccessKeyId"   => "access_key_id",
             "Action"           => "GetSessionToken",
-            "Signature"        => "mh6OAPPjI2GC5B8YBVC9n1V/SV4EHTWWR+4h7QjYrgo=",
+            "Signature"        => "HyF65paDxprCe+zEHx7wxah+hiZ43PhvtmeehDtfuw8=",
             "SignatureMethod"  => "HmacSHA256",
             "SignatureVersion" => "2",
             "Timestamp"        => "2012-03-24T22:10:38Z",
@@ -62,7 +62,7 @@ module Jedlik
           with(:query => {
             "AWSAccessKeyId"   => "access_key_id",
             "Action"           => "GetSessionToken",
-            "Signature"        => "mh6OAPPjI2GC5B8YBVC9n1V/SV4EHTWWR+4h7QjYrgo=",
+            "Signature"        => "HyF65paDxprCe+zEHx7wxah+hiZ43PhvtmeehDtfuw8=",
             "SignatureMethod"  => "HmacSHA256",
             "SignatureVersion" => "2",
             "Timestamp"        => "2012-03-24T22:10:38Z",
