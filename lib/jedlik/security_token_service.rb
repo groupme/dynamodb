@@ -52,12 +52,20 @@ module Jedlik
       sign(string_to_sign)
     end
 
+    # The last line needs to be a query string of all parameters
+    # in the request in alphabetical order.
     def string_to_sign
       [
         "GET",
         "sts.amazonaws.com",
         "/",
-        "AWSAccessKeyId=#{@_access_key_id}&Action=GetSessionToken&DurationSeconds=#{THIRTY_SIX_HOURS}&SignatureMethod=HmacSHA256&SignatureVersion=2&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}&Version=2011-06-15"
+        "AWSAccessKeyId=#{@_access_key_id}" +
+          "&Action=GetSessionToken" +
+          "&DurationSeconds=#{THIRTY_SIX_HOURS}" +
+          "&SignatureMethod=HmacSHA256" +
+          "&SignatureVersion=2" +
+          "&Timestamp=#{CGI.escape(authorization_params[:Timestamp])}" +
+          "&Version=2011-06-15"
       ].join("\n")
     end
 
