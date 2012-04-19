@@ -73,6 +73,8 @@ module Jedlik
     # credentials were previously obtained, no request is made until they
     # expire.
     def obtain_credentials
+      return if @expiration && @expiration >= Time.now.utc
+
       params = {
         :AWSAccessKeyId   => @_access_key_id,
         :SignatureMethod  => 'HmacSHA256',
