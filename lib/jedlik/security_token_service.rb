@@ -48,13 +48,13 @@ module Jedlik
 
     private
 
-    def signature
-      sign(string_to_sign)
+    def signature(authorization_params)
+      sign(string_to_sign(authorization_params))
     end
 
     # The last line needs to be a query string of all parameters
     # in the request in alphabetical order.
-    def string_to_sign
+    def string_to_sign(authorization_params)
       [
         "GET",
         "sts.amazonaws.com",
@@ -85,11 +85,18 @@ module Jedlik
     def obtain_credentials
       return unless credentials_expired?
 
+      authorization_params = {
+        :Action           => 'GetSessionToken',
+        :Timestamp        => Time.now.utc.iso8601,
+        :Version          => '2011-06-15',
+        :DurationSeconds  => THIRTY_SIX_HOURS # 36 hour expiration
+      }
+
       params = {
         :AWSAccessKeyId   => @_access_key_id,
         :SignatureMethod  => 'HmacSHA256',
         :SignatureVersion => '2',
-        :Signature        => signature
+        :Signature        => signature(authorization_params)
       }.merge(authorization_params)
 
       response = Typhoeus::Request.get("https://sts.amazonaws.com", :params => params)
@@ -102,15 +109,6 @@ module Jedlik
       else
         raise Jedlik::AuthenticationError.new(response.inspect)
       end
-    end
-
-    def authorization_params
-      {
-        :Action           => 'GetSessionToken',
-        :Timestamp        => Time.now.utc.iso8601,
-        :Version          => '2011-06-15',
-        :DurationSeconds  => THIRTY_SIX_HOURS # 36 hour expiration
-      }
     end
 
     # Sign (HMAC-SHA256) a string using the secret key given at
