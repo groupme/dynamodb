@@ -1,7 +1,7 @@
 module Typhoeus
   class Request
-    def sign(sts)
-      headers.merge!('x-amzn-authorization' => "AWS3 AWSAccessKeyId=#{sts.access_key_id},Algorithm=HmacSHA256,Signature=#{digest(sts.secret_access_key)}")
+    def sign(credentials)
+      headers.merge!('x-amzn-authorization' => "AWS3 AWSAccessKeyId=#{credentials.access_key_id},Algorithm=HmacSHA256,Signature=#{digest(credentials.secret_access_key)}")
     end
 
     private

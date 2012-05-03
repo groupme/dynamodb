@@ -1,9 +1,6 @@
 module Jedlik
-
   # Establishes a connection to Amazon DynamoDB using credentials.
   class Connection
-    attr_reader :sts
-
     DEFAULTS = {
       :endpoint => 'dynamodb.us-east-1.amazonaws.com',
     }
@@ -13,10 +10,17 @@ module Jedlik
     #     :endpoint # DynamoDB endpoint to use.
     #               # Default: 'dynamodb.us-east-1.amazonaws.com'
     #
-    def initialize(access_key_id, secret_access_key, opts={})
-      raise ArgumentError.new("access_key_id and secret_access_key are required") unless access_key_id && secret_access_key
+    def initialize(opts = {})
       opts = DEFAULTS.merge opts
-      @sts = SecurityTokenService.new(access_key_id, secret_access_key)
+
+      if opts[:token_service]
+        @sts = opts[:token_service]
+      elsif opts[:access_key_id] && opts[:secret_access_key]
+        @sts = SecurityTokenService.new(opts[:access_key_id], opts[:secret_access_key])
+      else
+        raise ArgumentError.new("access_key_id and secret_access_key are required")
+      end
+
       @endpoint = opts[:endpoint]
     end
 
@@ -29,8 +33,11 @@ module Jedlik
     # http://docs.amazonwebservices.com/amazondynamodb/latest/developerguide
     #
     def post(operation, data={})
-      request = new_request(operation, Yajl::Encoder.encode(data))
-      request.sign(sts)
+      credentials = @sts.credentials
+
+      request = new_request(credentials, operation, Yajl::Encoder.encode(data))
+      request.sign(credentials)
+
       hydra.queue(request)
       hydra.run
       response = request.response
@@ -43,34 +50,8 @@ module Jedlik
           Yajl::Parser.parse(response.body)
         end
       else
-        if response.code == 403
-          authenticate
-        else
-          raise_error(response)
-        end
+        raise_error(response)
       end
-    end
-
-    def credentials
-      {
-        :access_key_id      => @sts.access_key_id,
-        :secret_access_key  => @sts.secret_access_key,
-        :session_token      => @sts.session_token
-      }
-    end
-
-    def credentials=(hash)
-      raise ArgumentError unless hash.key?(:access_key_id) &&
-                                 hash.key?(:secret_access_key) &&
-                                 hash.key?(:session_token)
-
-      @sts.access_key_id = hash[:access_key_id]
-      @sts.secret_access_key = hash[:secret_access_key]
-      @sts.session_token = hash[:session_token]
-    end
-
-    def authenticate
-      @sts.refresh_credentials
     end
 
     private
@@ -79,7 +60,7 @@ module Jedlik
       Typhoeus::Hydra.hydra
     end
 
-    def new_request(operation, body)
+    def new_request(credentials, operation, body)
       Typhoeus::Request.new "https://#{@endpoint}/",
         :method   => :post,
         :body     => body,
@@ -87,7 +68,7 @@ module Jedlik
           'host'                  => @endpoint,
           'content-type'          => "application/x-amz-json-1.0",
           'x-amz-date'            => (Time.now.utc.strftime "%a, %d %b %Y %H:%M:%S GMT"),
-          'x-amz-security-token'  => sts.session_token,
+          'x-amz-security-token'  => credentials.session_token,
           'x-amz-target'          => "DynamoDB_20111205.#{operation}",
         }
     end

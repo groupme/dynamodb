@@ -38,22 +38,23 @@ module Jedlik
 
       it "obtains session_token, access_key_id, secret_access_key" do
         sts = SecurityTokenService.new("access_key_id", "secret_access_key")
-        sts.access_key_id.should == "access_key_id"
-        sts.secret_access_key.should == "secret_access_key"
-        sts.session_token.should == "session_token"
+        credentials = sts.credentials
+        credentials.access_key_id.should == "access_key_id"
+        credentials.secret_access_key.should == "secret_access_key"
+        credentials.session_token.should == "session_token"
       end
 
       it "does not query STS if the credentials are not expired" do
         sts = SecurityTokenService.new("access_key_id", "secret_access_key")
 
         sts.stub(:credentials_expired?).and_return(true)
-        sts.access_key_id
+        sts.credentials
         @request.should have_been_requested
 
         WebMock.reset!
 
         sts.stub(:credentials_expired?).and_return(false)
-        sts.access_key_id
+        sts.credentials
         @request.should_not have_been_requested
       end
     end
@@ -88,7 +89,7 @@ module Jedlik
       it "raises an AuthenticationError" do
         s = SecurityTokenService.new("access_key_id", "secret_access_key")
         proc {
-          s.session_token
+          s.credentials
         }.should raise_error(Jedlik::AuthenticationError)
       end
     end

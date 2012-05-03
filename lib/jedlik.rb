@@ -11,6 +11,7 @@ module Jedlik
   class AuthenticationError < StandardError; end
 
   require 'jedlik/typhoeus/request'
+  require 'jedlik/credentials'
   require 'jedlik/security_token_service'
   require 'jedlik/connection'
   require 'jedlik/response'

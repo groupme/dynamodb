@@ -21,29 +21,12 @@ module Jedlik
     def initialize(access_key_id, secret_access_key)
       @_access_key_id = access_key_id
       @_secret_access_key = secret_access_key
+      @credentials = nil
     end
 
-    # Get a temporary access key id from STS or from cache.
-    def access_key_id
+    def credentials
       obtain_credentials
-      @access_key_id
-    end
-
-    # Get a temporary secret access key from STS or from cache.
-    def secret_access_key
-      obtain_credentials
-      @secret_access_key
-    end
-
-    # Get a temporary session token from STS or from cache.
-    def session_token
-      obtain_credentials
-      @session_token
-    end
-
-    def refresh_credentials
-      @expiration = nil
-      obtain_credentials
+      @credentials
     end
 
     private
@@ -102,10 +85,11 @@ module Jedlik
       response = Typhoeus::Request.get("https://sts.amazonaws.com", :params => params)
       if response.success?
         body = response.body
-        @session_token      = get_tag(:SessionToken, body)
-        @secret_access_key  = get_tag(:SecretAccessKey, body)
-        @expiration         = Time.parse(get_tag(:Expiration, body))
-        @access_key_id      = get_tag(:AccessKeyId, body)
+        @expiration = Time.parse(get_tag(:Expiration, body))
+        @credentials = Credentials.new(
+          get_tag(:AccessKeyId, body),
+          get_tag(:SecretAccessKey, body),
+          get_tag(:SessionToken, body))
       else
         raise Jedlik::AuthenticationError.new(response.inspect)
       end
