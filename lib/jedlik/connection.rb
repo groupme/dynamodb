@@ -3,6 +3,7 @@ module Jedlik
   class Connection
     DEFAULTS = {
       :endpoint => 'dynamodb.us-east-1.amazonaws.com',
+      :timeout  => 5000 # ms
     }
 
     # Acceptable `opts` keys are:
@@ -22,6 +23,7 @@ module Jedlik
       end
 
       @endpoint = opts[:endpoint]
+      @timeout  = opts[:timeout]
     end
 
     # Create and send a request to DynamoDB.
@@ -42,7 +44,7 @@ module Jedlik
       hydra.run
       response = request.response
 
-      if response.code == 200
+      if response.success?
         case operation
         when :Query, :Scan, :GetItem
           Jedlik::Response.new(response)
@@ -61,26 +63,32 @@ module Jedlik
     end
 
     def new_request(credentials, operation, body)
-      Typhoeus::Request.new "https://#{@endpoint}/",
-        :method   => :post,
-        :body     => body,
-        :headers  => {
-          'host'                  => @endpoint,
-          'content-type'          => "application/x-amz-json-1.0",
-          'x-amz-date'            => (Time.now.utc.strftime "%a, %d %b %Y %H:%M:%S GMT"),
-          'x-amz-security-token'  => credentials.session_token,
-          'x-amz-target'          => "DynamoDB_20111205.#{operation}",
+      Typhoeus::Request.new "https://#@endpoint/",
+        :method  => :post,
+        :body    => body,
+        :timeout => @timeout,
+        :connect_timeout => @timeout,
+        :headers => {
+          'host'                 => @endpoint,
+          'content-type'         => "application/x-amz-json-1.0",
+          'x-amz-date'           => (Time.now.utc.strftime "%a, %d %b %Y %H:%M:%S GMT"),
+          'x-amz-security-token' => credentials.session_token,
+          'x-amz-target'         => "DynamoDB_20111205.#{operation}",
         }
     end
 
     def raise_error(response)
-      case response.code
-      when 400..499
-        raise ClientError, response.body
-      when 500..599
-        raise ServerError, response.code
+      if response.timed_out?
+        raise TimeoutError
       else
-        raise Exception, response.body
+        case response.code
+        when 400..499
+          raise ClientError, response.body
+        when 500..599
+          raise ServerError, response.code
+        else
+          raise BaseError, response.body
+        end
       end
     end
   end

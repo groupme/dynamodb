@@ -6,9 +6,11 @@ require 'cgi'
 require 'yajl'
 
 module Jedlik
-  class ClientError < Exception; end
-  class ServerError < Exception; end
-  class AuthenticationError < StandardError; end
+  class BaseError < RuntimeError; end
+  class ClientError < BaseError; end
+  class ServerError < BaseError; end
+  class TimeoutError < BaseError; end
+  class AuthenticationError < BaseError; end
 
   require 'jedlik/typhoeus/request'
   require 'jedlik/credentials'
