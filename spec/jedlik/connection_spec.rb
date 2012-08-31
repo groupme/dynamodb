@@ -90,6 +90,21 @@ describe Jedlik::Connection do
       response.should be_a_kind_of(Jedlik::Response)
     end
 
+    context "when a failure occurs" do
+      it "raises an error with the response attached" do
+        stub_request(:post, @url).to_return(:status => 500, :body => "Failed for some reason.")
+        error = nil
+        begin
+          connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
+        rescue => e
+          error = e
+        end
+        error.should be_an_instance_of(Jedlik::ServerError)
+        error.response.code.should == 500
+        error.message.should == "500: Failed for some reason."
+      end
+    end
+
     context "when the connection times out" do
       it "raises a Jedlik::TimeoutError" do
         stub_request(:post, @url).to_timeout

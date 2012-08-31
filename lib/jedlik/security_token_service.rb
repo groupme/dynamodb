@@ -91,7 +91,7 @@ module Jedlik
           get_tag(:SecretAccessKey, body),
           get_tag(:SessionToken, body))
       else
-        raise Jedlik::AuthenticationError.new(response.inspect)
+        raise AuthenticationError.new(response)
       end
     end
 

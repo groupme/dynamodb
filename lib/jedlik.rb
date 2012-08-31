@@ -6,7 +6,15 @@ require 'cgi'
 require 'yajl'
 
 module Jedlik
-  class BaseError < RuntimeError; end
+  class BaseError < RuntimeError
+    attr_reader :response
+
+    def initialize(response)
+      @response = response
+      super("#{response.code}: #{response.body}")
+    end
+  end
+
   class ClientError < BaseError; end
   class ServerError < BaseError; end
   class TimeoutError < BaseError; end

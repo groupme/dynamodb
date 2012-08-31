@@ -79,15 +79,15 @@ module Jedlik
 
     def raise_error(response)
       if response.timed_out?
-        raise TimeoutError
+        raise TimeoutError.new(response)
       else
         case response.code
         when 400..499
-          raise ClientError, response.body
+          raise ClientError.new(response)
         when 500..599
-          raise ServerError, response.code
+          raise ServerError.new(response)
         else
-          raise BaseError, response.body
+          raise BaseError.new(response)
         end
       end
     end
