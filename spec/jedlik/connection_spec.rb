@@ -105,6 +105,20 @@ describe Jedlik::Connection do
       end
     end
 
+    context "when the connection fails" do
+      it "raises a server error" do
+        stub_request(:post, @url).to_return(:status => 0, :body => "")
+        error = nil
+        begin
+          connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
+        rescue => e
+          error = e
+        end
+        error.should be_an_instance_of(Jedlik::ServerError)
+        error.response.code.should == 0
+      end
+    end
+
     context "when the connection times out" do
       it "raises a Jedlik::TimeoutError" do
         stub_request(:post, @url).to_timeout

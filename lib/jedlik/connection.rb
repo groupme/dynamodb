@@ -86,6 +86,8 @@ module Jedlik
           raise ClientError.new(response)
         when 500..599
           raise ServerError.new(response)
+        when 0
+          raise ServerError.new(response)
         else
           raise BaseError.new(response)
         end
