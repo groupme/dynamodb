@@ -37,7 +37,7 @@ module Jedlik
     def post(operation, data={})
       credentials = @sts.credentials
 
-      request = new_request(credentials, operation, Yajl::Encoder.encode(data))
+      request = new_request(credentials, operation, MultiJson.dump(data))
       request.sign(credentials)
 
       hydra.queue(request)
@@ -49,7 +49,7 @@ module Jedlik
         when :Query, :Scan, :GetItem
           Jedlik::Response.new(response)
         else
-          Yajl::Parser.parse(response.body)
+          MultiJson.load(response.body)
         end
       else
         raise_error(response)

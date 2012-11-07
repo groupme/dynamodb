@@ -26,10 +26,10 @@ describe Jedlik::Response do
       "Count" => 1,
       "ConsumedCapacityUnits" => 0.5
     }
-    @typhoeus_response = mock("response", :body => Yajl::Encoder.encode(body))
+    @typhoeus_response = mock("response", :body => MultiJson.dump(body))
   end
 
-  describe "#hash_key_element" do 
+  describe "#hash_key_element" do
     it "returns the typecast value of HashKeyElement" do
       response = Jedlik::Response.new(@typhoeus_response)
       response.hash_key_element.should == 1
@@ -51,7 +51,7 @@ describe Jedlik::Response do
       response.items[0]["disabled"].should == 0
       response.items[0]["group_id"].should == 1
       response.items[0]["person_id"].should == 1500
-    
+
       response.items[1]["name"].should == "Jane Smith"
       response.items[1]["created_at"].should == 1321564309.99428
       response.items[1]["disabled"].should == 1
@@ -59,7 +59,7 @@ describe Jedlik::Response do
       response.items[1]["person_id"].should == 1501
     end
   end
-  
+
   context "Item" do
     before do
       body = {
@@ -72,9 +72,9 @@ describe Jedlik::Response do
         },
         "ConsumedCapacityUnits" => 0.5
       }
-      @typhoeus_response = mock("response", :body => Yajl::Encoder.encode(body))
+      @typhoeus_response = mock("response", :body => MultiJson.dump(body))
     end
-    
+
     it "type casts response" do
       response = Jedlik::Response.new(@typhoeus_response)
       response.item["name"].should == "John Smith"

@@ -23,11 +23,11 @@ module Jedlik
       return unless json["Items"]
       @items ||= json["Items"].map { |i| Jedlik.deserialize(i) }
     end
-    
+
     private
 
     def json
-      @json ||= Yajl::Parser.parse(typhoeus_response.body)
+      @json ||= MultiJson.load(typhoeus_response.body)
     end
   end
 end

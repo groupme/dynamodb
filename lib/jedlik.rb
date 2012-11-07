@@ -3,7 +3,7 @@ require 'time'
 require 'base64'
 require 'openssl'
 require 'cgi'
-require 'yajl'
+require 'multi_json'
 
 module Jedlik
   class BaseError < RuntimeError
