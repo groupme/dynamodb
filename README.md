@@ -23,6 +23,11 @@ request body.
     conn.post :GetItem, {:TableName => "someTable", :Key => {:S => "someKey"}}
     => { ... }
 
+TODO
+----
+
+* Implement Signature Version 4
+
 Credits
 -------
 
