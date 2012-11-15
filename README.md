@@ -1,11 +1,9 @@
 DynamoDB
 ========
 
-Communicate with *Amazon DynamoDB* in Ruby. Raw access to the full API without
-having to handle temporary credentials or HTTP requests by yourself.
+Communicate with [Amazon DynamoDB](http://aws.amazon.com/dynamodb/) from Ruby.
 
-Does not require the AWS gem.  
-Requires **Typhoeus**.
+This is a lightweight alternative to the official Amazon AWS gem.
 
 Usage
 -----
@@ -17,12 +15,13 @@ request body.
 
     require 'dynamodb'
 
-    conn = DynamoDB::Connection.new 'DG7I54_KEY_ID', 'wr31PP+hu5d76+SECRET_KEY'
+    conn = DynamoDB::Connection.new 'ACCESS_KEY', 'SECRET_KEY'
 
-    conn.post :ListTables    # => {"TableNames"=>["table1", "table2"]}
+    conn.post :ListTables
+    => {"TableNames" => ["someTable", "anotherTable"]}
 
-    conn.post :GetItem, {:TableName => "table1", :Key => {:S => "foo"}}
-    # => Hash
+    conn.post :GetItem, {:TableName => "someTable", :Key => {:S => "someKey"}}
+    => { ... }
 
 Credits
 -------
