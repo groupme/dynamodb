@@ -5,6 +5,8 @@ Communicate with [Amazon DynamoDB](http://aws.amazon.com/dynamodb/) from Ruby.
 
 This is a lightweight alternative to the official Amazon AWS gem.
 
+The goal of this library is to be a high performance driver, not an ORM.
+
 Usage
 -----
 
