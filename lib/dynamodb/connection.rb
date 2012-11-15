@@ -1,4 +1,4 @@
-module Jedlik
+module DynamoDB
   # Establishes a connection to Amazon DynamoDB using credentials.
   class Connection
     DEFAULTS = {
@@ -47,7 +47,7 @@ module Jedlik
       if response.success?
         case operation
         when :Query, :Scan, :GetItem
-          Jedlik::Response.new(response)
+          DynamoDB::Response.new(response)
         else
           MultiJson.load(response.body)
         end

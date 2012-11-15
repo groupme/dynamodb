@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-module Jedlik
+module DynamoDB
   describe SecurityTokenService do
     let(:sts) { SecurityTokenService.new("access_key_id", "secret_access_key") }
 
@@ -90,7 +90,7 @@ module Jedlik
         s = SecurityTokenService.new("access_key_id", "secret_access_key")
         proc {
           s.credentials
-        }.should raise_error(Jedlik::AuthenticationError)
+        }.should raise_error(DynamoDB::AuthenticationError)
       end
     end
   end

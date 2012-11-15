@@ -1,4 +1,4 @@
-module Jedlik
+module DynamoDB
   attr_writer :access_key_id
   attr_writer :secret_acces_key
   attr_writer :session_token

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Jedlik do
+describe DynamoDB do
   describe "#serialize" do
     it "serializes to dynamo type format" do
       published_at = Time.now
@@ -12,7 +12,7 @@ describe Jedlik do
         :active => true
       }
 
-      Jedlik.serialize(hash).should == {
+      DynamoDB.serialize(hash).should == {
         "id" => {"N" => "1"},
         "name" => {"S" => "Gone with the Wind"},
         "published_at" => {"N" => published_at.to_f.to_s},
@@ -22,21 +22,21 @@ describe Jedlik do
     end
 
     it "serializes a single value" do
-      Jedlik.serialize(1).should == {"N" => "1"}
-      Jedlik.serialize(1.5).should == {"N" => "1.5"}
-      Jedlik.serialize("Hello World").should == {"S" => "Hello World"}
+      DynamoDB.serialize(1).should == {"N" => "1"}
+      DynamoDB.serialize(1.5).should == {"N" => "1.5"}
+      DynamoDB.serialize("Hello World").should == {"S" => "Hello World"}
     end
 
     it "omits nil/blank values" do
-      Jedlik.serialize("foo" => nil).should == {}
-      Jedlik.serialize("foo" => "").should == {}
+      DynamoDB.serialize("foo" => nil).should == {}
+      DynamoDB.serialize("foo" => "").should == {}
     end
   end
 
   describe "#deserialize" do
     it "deserializes single values" do
-      Jedlik.deserialize({"N" => "123"}).should == 123
-      Jedlik.deserialize({"S" => "Hello World"}).should == "Hello World"
+      DynamoDB.deserialize({"N" => "123"}).should == 123
+      DynamoDB.deserialize({"S" => "Hello World"}).should == "Hello World"
     end
 
     it "deserializes from dynamo type format" do
@@ -48,7 +48,7 @@ describe Jedlik do
         "price" => {"N" => "11.99"},
         "active" => {"N" => "1"}
       }
-      deserialized = Jedlik.deserialize(item)
+      deserialized = DynamoDB.deserialize(item)
       deserialized["id"].should == 1
       deserialized["name"].should == "Gone with the Wind"
       deserialized["published_at"].to_s.should == published_at.to_f.to_s

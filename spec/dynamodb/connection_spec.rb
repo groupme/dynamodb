@@ -1,10 +1,10 @@
 require 'spec_helper'
 require 'benchmark'
 
-describe Jedlik::Connection do
+describe DynamoDB::Connection do
   let(:token_service) {
     stub(:credentials =>
-      Jedlik::Credentials.new(
+      DynamoDB::Credentials.new(
         "access_key_id",
         "secret_access_key",
         "session_token"
@@ -14,11 +14,11 @@ describe Jedlik::Connection do
 
   describe "#initialize" do
     it "can be initialized with a token service" do
-      Jedlik::Connection.new(:token_service => token_service)
+      DynamoDB::Connection.new(:token_service => token_service)
     end
 
     it "can be initialized with an access key" do
-      Jedlik::Connection.new(
+      DynamoDB::Connection.new(
         :access_key_id => "id",
         :secret_access_key => "secret"
       )
@@ -27,14 +27,14 @@ describe Jedlik::Connection do
     context "no token service was provided" do
       it "requires an access_key_id and secret_access_key" do
         lambda {
-          Jedlik::Connection.new
+          DynamoDB::Connection.new
         }.should raise_error(ArgumentError)
       end
     end
   end
 
   describe "#post" do
-    let(:connection) { Jedlik::Connection.new(:token_service => token_service) }
+    let(:connection) { DynamoDB::Connection.new(:token_service => token_service) }
 
     before do
       Time.stub(:now => Time.at(1332635893)) # Sat Mar 24 20:38:13 -0400 2012
@@ -75,7 +75,7 @@ describe Jedlik::Connection do
         )
 
       response = connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
-      response.should be_a_kind_of(Jedlik::Response)
+      response.should be_a_kind_of(DynamoDB::Response)
     end
 
     it "type casts response when GetItem" do
@@ -87,7 +87,7 @@ describe Jedlik::Connection do
         )
 
       response = connection.post :GetItem, :TableName => "people", :Key => {:HashKeyElement => {:N => "1"}, :RangeKeyElement => {:N => 2}}
-      response.should be_a_kind_of(Jedlik::Response)
+      response.should be_a_kind_of(DynamoDB::Response)
     end
 
     context "when a failure occurs" do
@@ -99,7 +99,7 @@ describe Jedlik::Connection do
         rescue => e
           error = e
         end
-        error.should be_an_instance_of(Jedlik::ServerError)
+        error.should be_an_instance_of(DynamoDB::ServerError)
         error.response.code.should == 500
         error.message.should == "500: Failed for some reason."
       end
@@ -114,17 +114,17 @@ describe Jedlik::Connection do
         rescue => e
           error = e
         end
-        error.should be_an_instance_of(Jedlik::ServerError)
+        error.should be_an_instance_of(DynamoDB::ServerError)
         error.response.code.should == 0
       end
     end
 
     context "when the connection times out" do
-      it "raises a Jedlik::TimeoutError" do
+      it "raises a DynamoDB::TimeoutError" do
         stub_request(:post, @url).to_timeout
         expect {
           connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
-        }.to raise_error(Jedlik::TimeoutError)
+        }.to raise_error(DynamoDB::TimeoutError)
       end
     end
   end

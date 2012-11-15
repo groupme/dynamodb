@@ -5,7 +5,7 @@ require 'openssl'
 require 'cgi'
 require 'multi_json'
 
-module Jedlik
+module DynamoDB
   class BaseError < RuntimeError
     attr_reader :response
 
@@ -20,11 +20,11 @@ module Jedlik
   class TimeoutError < BaseError; end
   class AuthenticationError < BaseError; end
 
-  require 'jedlik/typhoeus/request'
-  require 'jedlik/credentials'
-  require 'jedlik/security_token_service'
-  require 'jedlik/connection'
-  require 'jedlik/response'
+  require 'dynamodb/typhoeus/request'
+  require 'dynamodb/credentials'
+  require 'dynamodb/security_token_service'
+  require 'dynamodb/connection'
+  require 'dynamodb/response'
 
   class << self
     def serialize(object)

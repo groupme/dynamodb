@@ -1,7 +1,7 @@
 require 'rspec'
 
 $:.unshift(File.join(File.dirname __FILE__), 'lib')
-require 'jedlik'
+require 'dynamodb'
 require 'webmock/rspec'
 
 RSpec.configure do |config|

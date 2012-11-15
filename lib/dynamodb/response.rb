@@ -1,4 +1,4 @@
-module Jedlik
+module DynamoDB
   class Response
     attr_reader :typhoeus_response
 
@@ -7,21 +7,21 @@ module Jedlik
     end
 
     def hash_key_element
-      Jedlik.deserialize(json["LastEvaluatedKey"]["HashKeyElement"])
+      DynamoDB.deserialize(json["LastEvaluatedKey"]["HashKeyElement"])
     end
 
     def range_key_element
-      Jedlik.deserialize(json["LastEvaluatedKey"]["RangeKeyElement"])
+      DynamoDB.deserialize(json["LastEvaluatedKey"]["RangeKeyElement"])
     end
 
     def item
       return unless json["Item"]
-      @item ||= Jedlik.deserialize(json["Item"])
+      @item ||= DynamoDB.deserialize(json["Item"])
     end
 
     def items
       return unless json["Items"]
-      @items ||= json["Items"].map { |i| Jedlik.deserialize(i) }
+      @items ||= json["Items"].map { |i| DynamoDB.deserialize(i) }
     end
 
     private

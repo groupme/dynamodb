@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Jedlik::Response do
+describe DynamoDB::Response do
   before do
     body = {
       "LastEvaluatedKey" => {
@@ -31,21 +31,21 @@ describe Jedlik::Response do
 
   describe "#hash_key_element" do
     it "returns the typecast value of HashKeyElement" do
-      response = Jedlik::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@typhoeus_response)
       response.hash_key_element.should == 1
     end
   end
 
   describe "#range_key_element" do
     it "returns the typecast value of RangeKeyElement" do
-      response = Jedlik::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@typhoeus_response)
       response.range_key_element.should == 1501
     end
   end
 
   context "Items" do
     it "type casts response" do
-      response = Jedlik::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@typhoeus_response)
       response.items[0]["name"].should == "John Smith"
       response.items[0]["created_at"].should == 1321564309.99428
       response.items[0]["disabled"].should == 0
@@ -76,7 +76,7 @@ describe Jedlik::Response do
     end
 
     it "type casts response" do
-      response = Jedlik::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@typhoeus_response)
       response.item["name"].should == "John Smith"
       response.item["created_at"].should == 1321564309.99428
       response.item["disabled"].should == 0

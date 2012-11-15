@@ -1,4 +1,4 @@
-module Jedlik
+module DynamoDB
   class Credentials
     attr_reader :access_key_id, :secret_access_key, :session_token
 
