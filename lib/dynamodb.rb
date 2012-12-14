@@ -25,10 +25,10 @@ module DynamoDB
   class TimeoutError < BaseError; end
   class AuthenticationError < BaseError; end
 
-  require 'dynamodb/typhoeus/request'
   require 'dynamodb/credentials'
   require 'dynamodb/security_token_service'
   require 'dynamodb/connection'
+  require 'dynamodb/request'
   require 'dynamodb/response'
 
   class << self
