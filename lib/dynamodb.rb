@@ -9,9 +9,14 @@ module DynamoDB
   class BaseError < RuntimeError
     attr_reader :response
 
-    def initialize(response)
+    def initialize(response = nil)
       @response = response
-      super("#{response.code}: #{response.body}")
+
+      if @response
+        super("#{@response.code}: #{@response.body}")
+      else
+        super
+      end
     end
   end
 

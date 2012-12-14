@@ -41,6 +41,8 @@ describe DynamoDB::Connection do
 
       @url = "https://dynamodb.us-east-1.amazonaws.com/"
       @headers = {
+        "Accept"                => "*/*",
+        "User-Agent"            => "Ruby",
         'Content-Type'          => 'application/x-amz-json-1.0',
         'Host'                  => 'dynamodb.us-east-1.amazonaws.com',
         'X-Amz-Date'            => 'Sun, 25 Mar 2012 00:38:13 GMT',
@@ -100,7 +102,7 @@ describe DynamoDB::Connection do
           error = e
         end
         error.should be_an_instance_of(DynamoDB::ServerError)
-        error.response.code.should == 500
+        error.response.code.should == "500"
         error.message.should == "500: Failed for some reason."
       end
     end
@@ -115,7 +117,7 @@ describe DynamoDB::Connection do
           error = e
         end
         error.should be_an_instance_of(DynamoDB::ServerError)
-        error.response.code.should == 0
+        error.response.code.should == "0"
       end
     end
 
