@@ -82,8 +82,13 @@ module DynamoDB
         :Signature        => signature(authorization_params)
       }.merge(authorization_params)
 
-      response = Typhoeus::Request.get("https://sts.amazonaws.com", :params => params)
-      if response.success?
+      uri = URI("https://sts.amazonaws.com")
+      uri.query = URI.encode_www_form(params)
+      response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+        http.request(Net::HTTP::Get.new(uri.request_uri))
+      end
+
+      if response.is_a?(Net::HTTPSuccess)
         body = response.body
         @expiration = Time.parse(get_tag(:Expiration, body))
         @credentials = Credentials.new(

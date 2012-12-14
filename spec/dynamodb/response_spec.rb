@@ -26,26 +26,26 @@ describe DynamoDB::Response do
       "Count" => 1,
       "ConsumedCapacityUnits" => 0.5
     }
-    @typhoeus_response = mock("response", :body => MultiJson.dump(body))
+    @http_response = mock("response", :body => MultiJson.dump(body))
   end
 
   describe "#hash_key_element" do
     it "returns the typecast value of HashKeyElement" do
-      response = DynamoDB::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@http_response)
       response.hash_key_element.should == 1
     end
   end
 
   describe "#range_key_element" do
     it "returns the typecast value of RangeKeyElement" do
-      response = DynamoDB::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@http_response)
       response.range_key_element.should == 1501
     end
   end
 
   context "Items" do
     it "type casts response" do
-      response = DynamoDB::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@http_response)
       response.items[0]["name"].should == "John Smith"
       response.items[0]["created_at"].should == 1321564309.99428
       response.items[0]["disabled"].should == 0
@@ -72,11 +72,11 @@ describe DynamoDB::Response do
         },
         "ConsumedCapacityUnits" => 0.5
       }
-      @typhoeus_response = mock("response", :body => MultiJson.dump(body))
+      @http_response = mock("response", :body => MultiJson.dump(body))
     end
 
     it "type casts response" do
-      response = DynamoDB::Response.new(@typhoeus_response)
+      response = DynamoDB::Response.new(@http_response)
       response.item["name"].should == "John Smith"
       response.item["created_at"].should == 1321564309.99428
       response.item["disabled"].should == 0

@@ -1,19 +1,15 @@
 module DynamoDB
   # Establishes a connection to Amazon DynamoDB using credentials.
   class Connection
-    DEFAULTS = {
-      :endpoint => 'dynamodb.us-east-1.amazonaws.com',
-      :timeout  => 5000 # ms
-    }
+    DEFAULT_HOST = "dynamodb.us-east-1.amazonaws.com"
 
     # Acceptable `opts` keys are:
     #
-    #     :endpoint # DynamoDB endpoint to use.
-    #               # Default: 'dynamodb.us-east-1.amazonaws.com'
+    #     :endpoint # DynamoDB endpoint to use, default 'dynamodb.us-east-1.amazonaws.com'
+    #     :uri      # Specify a URI instead: 'https://dynamodb.us-east-1.amazonaws.com/'
+    #     :timeout  # HTTP timeout, default 5 seconds
     #
     def initialize(opts = {})
-      opts = DEFAULTS.merge opts
-
       if opts[:token_service]
         @sts = opts[:token_service]
       elsif opts[:access_key_id] && opts[:secret_access_key]
@@ -22,8 +18,9 @@ module DynamoDB
         raise ArgumentError.new("access_key_id and secret_access_key are required")
       end
 
-      @endpoint = opts[:endpoint]
-      @timeout  = opts[:timeout]
+      endpoint = opts[:endpoint] || DEFAULT_HOST
+      @timeout = opts[:timeout]
+      @uri     = opts[:uri] || URI("https://#{endpoint}/")
     end
 
     # Create and send a request to DynamoDB.
@@ -37,60 +34,20 @@ module DynamoDB
     def post(operation, data={})
       credentials = @sts.credentials
 
-      request = new_request(credentials, operation, MultiJson.dump(data))
-      request.sign(credentials)
-
-      hydra.queue(request)
-      hydra.run
+      request = DynamoDB::Request.new(
+        uri:         @uri,
+        credentials: credentials,
+        operation:   operation,
+        data:        data,
+        timeout:     @timeout
+      )
       response = request.response
 
-      if response.success?
-        case operation
-        when :Query, :Scan, :GetItem
-          DynamoDB::Response.new(response)
-        else
-          MultiJson.load(response.body)
-        end
+      case operation
+      when :Query, :Scan, :GetItem
+        DynamoDB::Response.new(response)
       else
-        raise_error(response)
-      end
-    end
-
-    private
-
-    def hydra
-      Typhoeus::Hydra.hydra
-    end
-
-    def new_request(credentials, operation, body)
-      Typhoeus::Request.new "https://#@endpoint/",
-        :method  => :post,
-        :body    => body,
-        :timeout => @timeout,
-        :connect_timeout => @timeout,
-        :headers => {
-          'host'                 => @endpoint,
-          'content-type'         => "application/x-amz-json-1.0",
-          'x-amz-date'           => (Time.now.utc.strftime "%a, %d %b %Y %H:%M:%S GMT"),
-          'x-amz-security-token' => credentials.session_token,
-          'x-amz-target'         => "DynamoDB_20111205.#{operation}",
-        }
-    end
-
-    def raise_error(response)
-      if response.timed_out?
-        raise TimeoutError.new(response)
-      else
-        case response.code
-        when 400..499
-          raise ClientError.new(response)
-        when 500..599
-          raise ServerError.new(response)
-        when 0
-          raise ServerError.new(response)
-        else
-          raise BaseError.new(response)
-        end
+        MultiJson.load(response.body)
       end
     end
   end

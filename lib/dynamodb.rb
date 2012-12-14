@@ -1,4 +1,3 @@
-require 'typhoeus'
 require 'time'
 require 'base64'
 require 'openssl'
@@ -9,9 +8,14 @@ module DynamoDB
   class BaseError < RuntimeError
     attr_reader :response
 
-    def initialize(response)
+    def initialize(response = nil)
       @response = response
-      super("#{response.code}: #{response.body}")
+
+      if @response
+        super("#{@response.code}: #{@response.body}")
+      else
+        super
+      end
     end
   end
 
@@ -20,10 +24,10 @@ module DynamoDB
   class TimeoutError < BaseError; end
   class AuthenticationError < BaseError; end
 
-  require 'dynamodb/typhoeus/request'
   require 'dynamodb/credentials'
   require 'dynamodb/security_token_service'
   require 'dynamodb/connection'
+  require 'dynamodb/request'
   require 'dynamodb/response'
 
   class << self

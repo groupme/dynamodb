@@ -1,9 +1,9 @@
 module DynamoDB
   class Response
-    attr_reader :typhoeus_response
+    attr_reader :http_response
 
-    def initialize(typhoeus_response)
-      @typhoeus_response = typhoeus_response
+    def initialize(http_response)
+      @http_response = http_response
     end
 
     def hash_key_element
@@ -27,7 +27,7 @@ module DynamoDB
     private
 
     def json
-      @json ||= MultiJson.load(typhoeus_response.body)
+      @json ||= MultiJson.load(http_response.body)
     end
   end
 end
