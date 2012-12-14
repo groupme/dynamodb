@@ -1,19 +1,15 @@
 module DynamoDB
   # Establishes a connection to Amazon DynamoDB using credentials.
   class Connection
-    DEFAULTS = {
-      :endpoint => 'dynamodb.us-east-1.amazonaws.com',
-      :timeout  => 5000 # ms
-    }
+    DEFAULT_HOST = "dynamodb.us-east-1.amazonaws.com"
 
     # Acceptable `opts` keys are:
     #
-    #     :endpoint # DynamoDB endpoint to use.
-    #               # Default: 'dynamodb.us-east-1.amazonaws.com'
+    #     :endpoint # DynamoDB endpoint to use, default 'dynamodb.us-east-1.amazonaws.com'
+    #     :uri      # Specify a URI instead: 'https://dynamodb.us-east-1.amazonaws.com/'
+    #     :timeout  # HTTP timeout, default 5 seconds
     #
     def initialize(opts = {})
-      opts = DEFAULTS.merge opts
-
       if opts[:token_service]
         @sts = opts[:token_service]
       elsif opts[:access_key_id] && opts[:secret_access_key]
@@ -22,12 +18,9 @@ module DynamoDB
         raise ArgumentError.new("access_key_id and secret_access_key are required")
       end
 
-      @endpoint = opts[:endpoint]
-      @timeout  = opts[:timeout]
-    end
-
-    def uri
-      @uri ||= URI("https://#{@endpoint}/")
+      endpoint = opts[:endpoint] || DEFAULT_HOST
+      @timeout = opts[:timeout]
+      @uri     = opts[:uri] || URI("https://#{endpoint}/")
     end
 
     # Create and send a request to DynamoDB.
@@ -41,7 +34,13 @@ module DynamoDB
     def post(operation, data={})
       credentials = @sts.credentials
 
-      request = DynamoDB::Request.new(uri, credentials, operation, data)
+      request = DynamoDB::Request.new(
+        uri:         @uri,
+        credentials: credentials,
+        operation:   operation,
+        data:        data,
+        timeout:     @timeout
+      )
       response = request.response
 
       case operation

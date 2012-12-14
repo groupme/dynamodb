@@ -2,6 +2,8 @@ require "net/https"
 
 module DynamoDB
   class Request
+    TIMEOUT = 5 # seconds
+
     class << self
       def digest(signing_string, key)
         Base64.encode64(
@@ -10,11 +12,12 @@ module DynamoDB
       end
     end
 
-    def initialize(uri, credentials, operation, data)
-      @uri         = uri
-      @credentials = credentials
-      @operation   = operation
-      @data        = data
+    def initialize(args = {})
+      @uri         = args[:uri]
+      @credentials = args[:credentials]
+      @operation   = args[:operation]
+      @data        = args[:data]
+      @timeout     = args[:timeout] || TIMEOUT
     end
 
     def signed_http_request
@@ -47,6 +50,7 @@ module DynamoDB
     def response
       begin
         http_response = Net::HTTP.start(@uri.host, @uri.port, use_ssl: (@uri.scheme == "https")) do |http|
+          http.read_timeout = @timeout
           http.request(signed_http_request)
         end
 
