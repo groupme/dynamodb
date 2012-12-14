@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'benchmark'
 
 describe DynamoDB::Connection do
   let(:token_service) {
@@ -41,6 +40,8 @@ describe DynamoDB::Connection do
 
       @url = "https://dynamodb.us-east-1.amazonaws.com/"
       @headers = {
+        "Accept"                => "*/*",
+        "User-Agent"            => "DynamoDB/1.0.0",
         'Content-Type'          => 'application/x-amz-json-1.0',
         'Host'                  => 'dynamodb.us-east-1.amazonaws.com',
         'X-Amz-Date'            => 'Sun, 25 Mar 2012 00:38:13 GMT',
@@ -88,44 +89,6 @@ describe DynamoDB::Connection do
 
       response = connection.post :GetItem, :TableName => "people", :Key => {:HashKeyElement => {:N => "1"}, :RangeKeyElement => {:N => 2}}
       response.should be_a_kind_of(DynamoDB::Response)
-    end
-
-    context "when a failure occurs" do
-      it "raises an error with the response attached" do
-        stub_request(:post, @url).to_return(:status => 500, :body => "Failed for some reason.")
-        error = nil
-        begin
-          connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
-        rescue => e
-          error = e
-        end
-        error.should be_an_instance_of(DynamoDB::ServerError)
-        error.response.code.should == 500
-        error.message.should == "500: Failed for some reason."
-      end
-    end
-
-    context "when the connection fails" do
-      it "raises a server error" do
-        stub_request(:post, @url).to_return(:status => 0, :body => "")
-        error = nil
-        begin
-          connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
-        rescue => e
-          error = e
-        end
-        error.should be_an_instance_of(DynamoDB::ServerError)
-        error.response.code.should == 0
-      end
-    end
-
-    context "when the connection times out" do
-      it "raises a DynamoDB::TimeoutError" do
-        stub_request(:post, @url).to_timeout
-        expect {
-          connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
-        }.to raise_error(DynamoDB::TimeoutError)
-      end
     end
   end
 end

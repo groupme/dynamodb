@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name         = 'dynamodb'
-  s.version      = '0.0.2'
+  s.version      = '1.0.0'
   s.summary      = "Communicate with Amazon DynamoDB."
   s.description  = "Communicate with Amazon DynamoDB. Raw access to the full API without having to handle temporary credentials or HTTP requests by yourself."
   s.authors      = ["Brandon Keene", "Dave Yeu"]
@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.executables  = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.homepage     = 'http://github.com/groupme/dynamodb'
 
-  s.add_runtime_dependency 'typhoeus', '0.4.2'
   s.add_runtime_dependency 'multi_json', '1.3.7'
 
   s.add_development_dependency 'rspec', '2.8.0'
