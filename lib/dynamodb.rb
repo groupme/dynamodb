@@ -1,4 +1,3 @@
-require 'typhoeus'
 require 'time'
 require 'base64'
 require 'openssl'
