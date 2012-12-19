@@ -18,23 +18,6 @@ describe DynamoDB::Request do
     Time.stub(now: Time.new(2012, 12, 12, 12, 12, 12, "+00:00"))
   end
 
-  describe "#http_request" do
-    it "crafts an unsigned Net::HTTP request" do
-      http_request = request.http_request
-      http_request.should be_an_instance_of(Net::HTTP::Post)
-      http_request.path.should == uri.to_s
-      http_request.body.should == MultiJson.dump(data)
-
-      http_request["accept"].should == "*/*"
-      http_request["user-agent"].should == "DynamoDB/1.0.0"
-      http_request["host"].should == "dynamo.host"
-      http_request["content-type"].should == "application/x-amz-json-1.0"
-      http_request["x-amz-date"].should == "Wed, 12 Dec 2012 12:12:12 GMT"
-      http_request["x-amz-security-token"].should == "session_token"
-      http_request["x-amz-target"].should == "DynamoDB_20111205.Query"
-    end
-  end
-
   describe "#signature" do
     it "returns the AWS authorization signature" do
       amazon_header_string = [
@@ -51,42 +34,25 @@ describe DynamoDB::Request do
     end
   end
 
-  describe "#signed_http_request" do
-    it "signs the HTTP request with a session token from the AWS Security Token Service" do
-      signature = request.signature
-      signed_http_request = request.signed_http_request
-      signed_http_request["x-amzn-authorization"] = "AWS3 AWSAccessKeyId=access_key_id,Algorithm=HmacSHA256,Signature=#{signature}"
+  describe "#headers" do
+    it "returns as Hash of headers, including AWS security headers" do
+      headers = request.headers
+      headers.should == {
+        "accept"               => "*/*",
+        "user-agent"           => "DynamoDB/1.0.0",
+        "host"                 => "dynamo.host",
+        "content-type"         => "application/x-amz-json-1.0",
+        "x-amz-date"           => "Wed, 12 Dec 2012 12:12:12 GMT",
+        "x-amz-security-token" => "session_token",
+        "x-amz-target"         => "DynamoDB_20111205.Query",
+        "x-amzn-authorization" => "AWS3 AWSAccessKeyId=access_key_id,Algorithm=HmacSHA256,Signature=#{request.signature}"
+      }
     end
   end
 
-  describe "#response" do
-    context "when the request succeeds" do
-      it "returns a response with a body" do
-        stub_request(:post, uri.to_s).to_return(status: 200, body: "{}", headers: {})
-        response = request.response
-        response.body.should == "{}"
-      end
-    end
-
-    context "when a server error occurs" do
-      it "raises a DynamoDB::ServerError" do
-        stub_request(:post, uri.to_s).to_return(status: 500, body: "Failed for some reason")
-        expect { request.response }.to raise_error(DynamoDB::ServerError)
-      end
-    end
-
-    context "when the connection fails" do
-      it "raises a DynamoDB::ServerError" do
-        stub_request(:post, uri.to_s).to_return(status: 0, body: "")
-        expect { request.response }.to raise_error(DynamoDB::ServerError)
-      end
-    end
-
-    context "when the connection times out" do
-      it "raises a DynamoDB::TimeoutError" do
-        stub_request(:post, uri.to_s).to_timeout
-        expect { request.response }.to raise_error(DynamoDB::TimeoutError)
-      end
+  describe "#body" do
+    it "returns the JSON-encoded data" do
+      request.body.should == MultiJson.dump(data)
     end
   end
 end

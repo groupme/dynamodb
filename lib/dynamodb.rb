@@ -1,34 +1,21 @@
+require "uri"
 require 'time'
-require 'base64'
-require 'openssl'
 require 'cgi'
 require 'multi_json'
 
 module DynamoDB
-  class BaseError < RuntimeError
-    attr_reader :response
-
-    def initialize(response = nil)
-      @response = response
-
-      if @response
-        super("#{@response.code}: #{@response.body}")
-      else
-        super
-      end
-    end
-  end
-
+  class BaseError < RuntimeError; end
   class ClientError < BaseError; end
   class ServerError < BaseError; end
-  class TimeoutError < BaseError; end
   class AuthenticationError < BaseError; end
 
   require 'dynamodb/credentials'
   require 'dynamodb/security_token_service'
   require 'dynamodb/connection'
+  require 'dynamodb/http_handler'
   require 'dynamodb/request'
-  require 'dynamodb/response'
+  require 'dynamodb/success_response'
+  require 'dynamodb/failure_response'
 
   class << self
     def serialize(object)
