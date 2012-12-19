@@ -3,6 +3,16 @@ module DynamoDB
   class Connection
     DEFAULT_HOST = "dynamodb.us-east-1.amazonaws.com"
 
+    class << self
+      def http_handler
+        @http_handler ||= HttpHandler.new
+      end
+
+      def http_handler=(new_http_handler)
+        @http_handler = new_http_handler
+      end
+    end
+
     # Acceptable `opts` keys are:
     #
     #     :endpoint # DynamoDB endpoint to use, default 'dynamodb.us-east-1.amazonaws.com'
@@ -19,16 +29,17 @@ module DynamoDB
       end
 
       endpoint = opts[:endpoint] || DEFAULT_HOST
-      @timeout = opts[:timeout]
-      @uri     = opts[:uri] || URI("https://#{endpoint}/")
+      @uri     = URI(opts[:uri] || "https://#{endpoint}/")
+
+      set_timeout(opts[:timeout]) if opts[:timeout]
     end
 
-    # Create and send a request to DynamoDB.
-    # Returns a hash extracted from the response body.
+    # Create and send a request to DynamoDB
+    #
+    # This returns either a SuccessResponse or a FailureResponse.
     #
     # `operation` can be any DynamoDB operation. `data` is a hash that will be
     # used as the request body (in JSON format). More info available at:
-    #
     # http://docs.amazonwebservices.com/amazondynamodb/latest/developerguide
     #
     def post(operation, data={})
@@ -38,17 +49,19 @@ module DynamoDB
         uri:         @uri,
         credentials: credentials,
         operation:   operation,
-        data:        data,
-        timeout:     @timeout
+        data:        data
       )
-      response = request.response
+      http_handler.handle(request)
+    end
 
-      case operation
-      when :Query, :Scan, :GetItem
-        DynamoDB::Response.new(response)
-      else
-        MultiJson.load(response.body)
-      end
+    private
+
+    def http_handler
+      self.class.http_handler
+    end
+
+    def set_timeout(timeout)
+      http_handler.timeout = timeout
     end
   end
 end
