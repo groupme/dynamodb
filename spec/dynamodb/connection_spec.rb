@@ -64,7 +64,7 @@ describe DynamoDB::Connection do
         )
 
       result = connection.post :ListTables
-      result.should == {"TableNames" => ["example"]}
+      result.data.should == {"TableNames" => ["example"]}
     end
 
     it "type casts response when Query" do
@@ -76,7 +76,7 @@ describe DynamoDB::Connection do
         )
 
       response = connection.post :Query, :TableName => "people", :HashKeyId => {:N => "1"}
-      response.should be_a_kind_of(DynamoDB::Response)
+      response.should be_a_kind_of(DynamoDB::SuccessResponse)
     end
 
     it "type casts response when GetItem" do
@@ -88,7 +88,7 @@ describe DynamoDB::Connection do
         )
 
       response = connection.post :GetItem, :TableName => "people", :Key => {:HashKeyElement => {:N => "1"}, :RangeKeyElement => {:N => 2}}
-      response.should be_a_kind_of(DynamoDB::Response)
+      response.should be_a_kind_of(DynamoDB::SuccessResponse)
     end
   end
 end
