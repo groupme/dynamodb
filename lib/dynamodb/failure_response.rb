@@ -20,6 +20,10 @@ module DynamoDB
       @error ||= http_response_error
     end
 
+    def body
+      @http_response.body
+    end
+
     private
 
     def http_response_error
