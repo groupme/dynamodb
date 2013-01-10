@@ -53,6 +53,8 @@ module DynamoDB
         response
       rescue *NETWORK_ERRORS => e
         FailureResponse.new.tap do |response|
+          response.body = nil
+          response.code = nil
           response.error = e
         end
       end

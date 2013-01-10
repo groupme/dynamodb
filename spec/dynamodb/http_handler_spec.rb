@@ -41,6 +41,7 @@ describe DynamoDB::HttpHandler do
       response.should be_an_instance_of(DynamoDB::FailureResponse)
       response.should_not be_success
       response.error.should == error
+      response.body.should be_nil
     end
 
     it "respects a custom timeout option (set on initialize)" do

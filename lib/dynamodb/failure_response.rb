@@ -6,7 +6,7 @@ module DynamoDB
   # * `ServerError` for 5XX or unknown responses
   # * Network errors, which are enumerated in HttpHandler
   class FailureResponse
-    attr_accessor :error
+    attr_accessor :error, :body, :code
 
     def initialize(http_response = nil)
       @http_response = http_response
@@ -21,16 +21,20 @@ module DynamoDB
     end
 
     def body
-      @http_response.body
+      @body ||= @http_response && @http_response.body
+    end
+
+    def code
+      @code ||= @http_response && @http_response.code
     end
 
     private
 
     def http_response_error
-      if (400..499).include?(@http_response.code.to_i)
-        ClientError.new("#{@http_response.code}: #{@http_response.message}")
+      if (400..499).include?(code.to_i)
+        ClientError.new("#{code}: #{@http_response.message}")
       else
-        ServerError.new("#{@http_response.code}: #{@http_response.message}")
+        ServerError.new("#{code}: #{@http_response.message}")
       end
     end
   end
