@@ -61,6 +61,14 @@ module DynamoDB
         {"N" => (value ? 1 : 0).to_s}
       when Time
         {"N" => value.to_f.to_s}
+      when Array
+        if value.all? {|n| n.kind_of?(String) }
+          {"SS" => value.uniq}
+        elsif value.all? {|n| n.kind_of?(Numeric) }
+          {"NS" => value.uniq}
+        else
+          raise ClientError.new("cannot mix data types in sets")
+        end
       else
         {"S" => value.to_s}
       end
@@ -72,6 +80,7 @@ module DynamoDB
       case k
       when "N" then v.include?('.') ? v.to_f : v.to_i
       when "S" then v.to_s
+      when "SS","NS" then v
       else
         raise "Type not recoginized: #{k}"
       end

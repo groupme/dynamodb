@@ -31,6 +31,20 @@ describe DynamoDB do
       DynamoDB.serialize("foo" => nil).should == {}
       DynamoDB.serialize("foo" => "").should == {}
     end
+
+    it "serializes StringSet" do
+      DynamoDB.serialize(["foo", "bar", "foo"]).should == {"SS" => ["foo", "bar"]}
+    end
+
+    it "serializes NumberSet" do
+      DynamoDB.serialize([1, 2, 1]).should == {"NS" => [1,2]}
+    end
+
+    it "raises an error on mixed types" do
+      lambda {
+        DynamoDB.serialize([1, "2", 1])
+      }.should raise_error
+    end
   end
 
   describe "#deserialize" do
@@ -54,6 +68,16 @@ describe DynamoDB do
       deserialized["published_at"].to_s.should == published_at.to_f.to_s
       deserialized["price"].should == 11.99
       deserialized["active"].should == 1
+    end
+
+    it "deserializes StringSet and NumberSet" do
+      item = {
+        "turtles" => {"SS" => ["Leonardo", "Michelangelo"]},
+        "powerball" => {"NS" => [1,2]}
+      }
+      deserialized = DynamoDB.deserialize(item)
+      deserialized["turtles"].should == ["Leonardo", "Michelangelo"]
+      deserialized["powerball"].should == [1,2]
     end
   end
 end
