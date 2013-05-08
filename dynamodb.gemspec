@@ -1,6 +1,8 @@
+require "./lib/dynamodb/version"
+
 Gem::Specification.new do |s|
   s.name         = 'dynamodb'
-  s.version      = '1.0.0'
+  s.version      = DynamoDB::VERSION
   s.summary      = "Communicate with Amazon DynamoDB."
   s.description  = "Communicate with Amazon DynamoDB. Raw access to the full API without having to handle temporary credentials or HTTP requests by yourself."
   s.authors      = ["Brandon Keene", "Dave Yeu"]

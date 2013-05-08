@@ -9,8 +9,9 @@ module DynamoDB
   class ServerError < BaseError; end
   class AuthenticationError < BaseError; end
 
-  require 'dynamodb/credentials'
-  require 'dynamodb/security_token_service'
+  Credentials = Struct.new(:access_key_id, :secret_access_key)
+
+  require 'dynamodb/version'
   require 'dynamodb/connection'
   require 'dynamodb/http_handler'
   require 'dynamodb/request'
