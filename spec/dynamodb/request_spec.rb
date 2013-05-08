@@ -21,11 +21,11 @@ describe DynamoDB::Request do
       "content-type"=>"application/x-amz-json-1.0",
       "x-amz-target"=>"DynamoDB_20111205.ListTables",
       "content-length"=>2,
-      "user-agent"=>"DynamoDB/#{DynamoDB::VERSION}",
+      "user-agent"=>"groupme/dynamodb",
       "host"=>"dynamodb.us-east-1.amazonaws.com",
       "x-amz-date"=>"20130508T201304Z",
       "x-amz-content-sha256"=>"44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-      "authorization"=>"AWS4-HMAC-SHA256 Credential=access_key_id/20130508/us-east-1/dynamodb/aws4_request, SignedHeaders=content-length;content-type;host;user-agent;x-amz-content-sha256;x-amz-date;x-amz-target, Signature=0ca052a91421f5bf54b64ca4f4f5f6aef059b4f414e0c2543a65ff13d298fb42"
+      "authorization"=>"AWS4-HMAC-SHA256 Credential=access_key_id/20130508/us-east-1/dynamodb/aws4_request, SignedHeaders=content-length;content-type;host;user-agent;x-amz-content-sha256;x-amz-date;x-amz-target, Signature=52fab5c720b35ce247f8388c5c8f66b300074ae88b666985ee26ca70d923be1d"
     }
   end
 end

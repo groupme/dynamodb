@@ -26,7 +26,7 @@ module DynamoDB
 
     def our_headers
       {
-        "user-agent"           => "DynamoDB/#{DynamoDB::VERSION}",
+        "user-agent"           => "groupme/dynamodb",
         "host"                 => uri.host,
         "content-type"         => "application/x-amz-json-1.0",
         "content-length"       => body.size,
