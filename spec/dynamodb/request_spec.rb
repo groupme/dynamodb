@@ -7,6 +7,7 @@ describe DynamoDB::Request do
   let(:request) {
     DynamoDB::Request.new(
       uri:          uri,
+      api_version:  "DynamoDB_20111205",
       credentials:  credentials,
       data:         data,
       operation:    "ListTables",

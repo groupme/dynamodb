@@ -11,13 +11,14 @@ module DynamoDB
       end
     end
 
-    attr_reader :uri, :datetime, :credentials, :region, :data, :service, :operation
+    attr_reader :uri, :datetime, :credentials, :region, :data, :service, :operation, :api_version
 
     def initialize(args = {})
       @uri          = args[:uri]
       @credentials  = args[:credentials]
       @operation    = args[:operation]
       @data         = args[:data]
+      @api_version  = args[:api_version]
       @region       = args[:region] || "us-east-1"
       @datetime     = Time.now.utc.strftime("%Y%m%dT%H%M%SZ")
       @service      = "dynamodb"
@@ -30,7 +31,7 @@ module DynamoDB
         "content-type"         => "application/x-amz-json-1.0",
         "content-length"       => body.size,
         "x-amz-date"           => datetime,
-        "x-amz-target"         => "DynamoDB_20111205.#{operation}",
+        "x-amz-target"         => "#{api_version}.#{operation}",
         "x-amz-content-sha256" => hexdigest(body || '')
       }
     end

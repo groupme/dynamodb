@@ -11,10 +11,10 @@ module DynamoDB
       end
     end
 
-    # Acceptable `opts` keys are:
-    #
-    #     :uri      # default 'https://dynamodb.us-east-1.amazonaws.com/'
-    #     :timeout  # HTTP timeout, default 5 seconds
+    # Create a connection
+    # uri:          # default 'https://dynamodb.us-east-1.amazonaws.com/'
+    # timeout:      # default 5 seconds
+    # api_version:  # default 
     #
     def initialize(opts = {})
       if opts[:access_key_id] && opts[:secret_access_key]
@@ -25,6 +25,8 @@ module DynamoDB
 
       @uri = URI(opts[:uri] || "https://dynamodb.us-east-1.amazonaws.com/")
       set_timeout(opts[:timeout]) if opts[:timeout]
+
+      @api_version = opts[:api_version] || "DynamoDB_20111205"
     end
 
     # Create and send a request to DynamoDB
@@ -39,6 +41,7 @@ module DynamoDB
       request = DynamoDB::Request.new(
         uri:         @uri,
         credentials: @credentials,
+        api_version: @api_version,
         operation:   operation,
         data:        data
       )
