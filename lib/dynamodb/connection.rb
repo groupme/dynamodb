@@ -1,3 +1,5 @@
+require "aws4/signer"
+
 module DynamoDB
   # Establishes a connection to Amazon DynamoDB using credentials.
   class Connection
@@ -14,41 +16,47 @@ module DynamoDB
     # Create a connection
     # uri:          # default 'https://dynamodb.us-east-1.amazonaws.com/'
     # timeout:      # default 5 seconds
-    # api_version:  # default 
+    # api_version:  # default
     #
     def initialize(opts = {})
-      if opts[:access_key_id] && opts[:secret_access_key]
-        @credentials = DynamoDB::Credentials.new(opts[:access_key_id], opts[:secret_access_key])
-      else
+      if !(opts[:access_key_id] && opts[:secret_access_key])
         raise ArgumentError.new("access_key_id and secret_access_key are required")
       end
 
-      @uri = URI(opts[:uri] || "https://dynamodb.us-east-1.amazonaws.com/")
       set_timeout(opts[:timeout]) if opts[:timeout]
-
+      @uri = URI(opts[:uri] || "https://dynamodb.us-east-1.amazonaws.com/")
+      region = @uri.host.split(".", 4)[1] || "us-east-1"
       @api_version = opts[:api_version] || "DynamoDB_20111205"
+      @signer = AWS4::Signer.new(
+        access_key: opts[:access_key_id],
+        secret_key: opts[:secret_access_key],
+        region: region
+      )
     end
 
     # Create and send a request to DynamoDB
     #
     # This returns either a SuccessResponse or a FailureResponse.
     #
-    # `operation` can be any DynamoDB operation. `data` is a hash that will be
+    # `operation` can be any DynamoDB operation. `body` is a hash that will be
     # used as the request body (in JSON format). More info available at:
     # http://docs.amazonwebservices.com/amazondynamodb/latest/developerguide
     #
-    def post(operation, data={})
+    def post(operation, body={})
       request = DynamoDB::Request.new(
-        uri:         @uri,
-        credentials: @credentials,
-        api_version: @api_version,
-        operation:   operation,
-        data:        data
+        signer: @signer,
+        uri: @uri,
+        operation: version(operation),
+        body: body
       )
       http_handler.handle(request)
     end
 
     private
+
+    def version(op)
+      "#{@api_version}.#{op}"
+    end
 
     def http_handler
       self.class.http_handler
