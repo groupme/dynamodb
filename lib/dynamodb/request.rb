@@ -25,7 +25,7 @@ module DynamoDB
         "User-Agent"           => "groupme/dynamodb",
         "Host"                 => uri.host,
         "Content-Type"         => "application/x-amz-json-1.0",
-        "Content-Length"       => body.size.to_s,
+        "Content-Length"       => body.bytesize.to_s,
         "X-AMZ-Date"           => date.strftime(ISO8601),
         "X-AMZ-Target"         => operation,
         "X-AMZ-Content-SHA256" => hexdigest(body || '')
