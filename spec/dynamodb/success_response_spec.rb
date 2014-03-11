@@ -68,6 +68,44 @@ describe DynamoDB::SuccessResponse do
     end
   end
 
+  it "returns type-casted entries from Responses keys" do
+    body = {
+      "Responses" => {
+        "table_name" => [
+          {
+            "text" => { "S" => "hi" },
+            "message_id" => { "N" => "1000" },
+            "like_user_ids" => { "SS" => ["1", "2"] }
+          },
+          {
+            "text" => { "S" => "hello" },
+            "message_id" => { "N" => "2000" },
+            "like_user_ids" => { "SS" => ["3", "4"] }
+          }
+        ],
+        "other_table_name" => [
+          {
+            "text" => { "S" => "goodbye"}
+          }
+        ]
+      }
+    }
+
+    http_response = stub(Net::HTTPResponse, body: MultiJson.dump(body))
+
+    response = DynamoDB::SuccessResponse.new(http_response)
+
+    response.responses["table_name"][0]["text"].should == "hi"
+    response.responses["table_name"][0]["message_id"].should == 1000
+    response.responses["table_name"][0]["like_user_ids"].should == ["1", "2"]
+
+    response.responses["table_name"][1]["text"].should == "hello"
+    response.responses["table_name"][1]["message_id"].should == 2000
+    response.responses["table_name"][1]["like_user_ids"].should == ["3", "4"]
+
+    response.responses["other_table_name"][0]["text"].should == "goodbye"
+  end
+
   describe "#item" do
     it "returns the type-casted 'Item' key" do
       body = {
