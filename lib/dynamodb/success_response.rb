@@ -35,6 +35,10 @@ module DynamoDB
       @items ||= data["Items"].map { |i| DynamoDB.deserialize(i) }
     end
 
+    def responses
+      return unless data["Responses"]
+      @responses ||= build_responses
+    end
     def success?
       true
     end
@@ -46,6 +50,17 @@ module DynamoDB
     # Access the deserialized JSON response body
     def data
       @data ||= MultiJson.load(http_response.body)
+    end
+
+    private
+
+    def build_responses
+      responses = {}
+      data["Responses"].keys.each do |key|
+        items = data["Responses"][key].map { |i| DynamoDB.deserialize(i)}
+        responses[key] = items
+      end
+      responses
     end
   end
 end
