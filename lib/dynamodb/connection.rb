@@ -24,14 +24,12 @@ module DynamoDB
       end
 
       set_timeout(opts[:timeout]) if opts[:timeout]
+
+      @access_key_id = opts[:access_key_id]
+      @secret_access_key = opts[:secret_access_key]
       @uri = URI(opts[:uri] || "https://dynamodb.us-east-1.amazonaws.com/")
-      region = @uri.host.split(".", 4)[1] || "us-east-1"
+      @region = @uri.host.split(".", 4)[1] || "us-east-1"
       @api_version = opts[:api_version] || "DynamoDB_20111205"
-      @signer = AWS4::Signer.new(
-        access_key: opts[:access_key_id],
-        secret_key: opts[:secret_access_key],
-        region: region
-      )
     end
 
     # Create and send a request to DynamoDB
@@ -43,8 +41,13 @@ module DynamoDB
     # http://docs.amazonwebservices.com/amazondynamodb/latest/developerguide
     #
     def post(operation, body={})
+      signer = AWS4::Signer.new(
+        access_key: @access_key_id,
+        secret_key: @secret_access_key,
+        region: @region
+      )
       request = DynamoDB::Request.new(
-        signer: @signer,
+        signer: signer,
         uri: @uri,
         operation: version(operation),
         body: body
