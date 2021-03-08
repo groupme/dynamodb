@@ -1,4 +1,4 @@
-require "aws4/signer"
+require "aws4/lib/aws4/signer"
 
 module DynamoDB
   # Establishes a connection to Amazon DynamoDB using credentials.

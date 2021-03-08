@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.executables  = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.homepage     = 'http://github.com/groupme/dynamodb'
 
-  s.add_runtime_dependency 'aws4', '0.0.2'
   s.add_runtime_dependency 'multi_json', '>= 1.3.7'
 
   s.add_development_dependency 'rake'
