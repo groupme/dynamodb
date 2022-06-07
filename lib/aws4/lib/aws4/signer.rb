@@ -26,7 +26,7 @@ module AWS4
       @date = (date_header ? Time.parse(date_header) : Time.now).utc.strftime(RFC8601BASIC)
       dump if debug
       signed = headers.dup
-      signed['Authorization'] = authorization(headers)
+      # signed['Authorization'] = authorization(headers)
       signed
     end
 
