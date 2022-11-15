@@ -80,6 +80,7 @@ module DynamoDB
       when "N" then v.include?('.') ? v.to_f : v.to_i
       when "S" then v.to_s
       when "SS","NS" then v
+      when "NULL" then nil
       else
         raise "Type not recoginized: #{k}"
       end

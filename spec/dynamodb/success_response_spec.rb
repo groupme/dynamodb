@@ -45,7 +45,8 @@ describe DynamoDB::SuccessResponse do
             "created_at" => {"N" => "1321564309.99428"},
             "disabled"   => {"N" => "1"},
             "group_id"   => {"N" => "1"},
-            "person_id"  => {"N" => "1501"}
+            "person_id"  => {"N" => "1501"},
+            "pinned_at"  => {"NULL" => true}
           }
         ],
         "Count" => 1,
