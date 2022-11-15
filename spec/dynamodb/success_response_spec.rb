@@ -9,9 +9,10 @@ describe DynamoDB::SuccessResponse do
           "RangeKeyElement" => {"N" => "1501"}
         }
       }
-      http_response = stub(Net::HTTPResponse, body: MultiJson.dump(body))
-      response = DynamoDB::SuccessResponse.new(http_response)
-      response.hash_key_element.should == 1
+      stub = stub_request(:post, "https://dynamodb.local").
+        to_return(status: 201, body: MultiJson.dump(body))
+      response = DynamoDB::SuccessResponse.new(stub.response)
+      expect(response.hash_key_element).to eq(1)
     end
   end
 
@@ -23,9 +24,10 @@ describe DynamoDB::SuccessResponse do
           "RangeKeyElement" => {"N" => "1501"}
         }
       }
-      http_response = stub(Net::HTTPResponse, body: MultiJson.dump(body))
-      response = DynamoDB::SuccessResponse.new(http_response)
-      response.range_key_element.should == 1501
+      stub = stub_request(:post, "https://dynamodb.local").
+        to_return(status: 201, body: MultiJson.dump(body))
+      response = DynamoDB::SuccessResponse.new(stub.response)
+      expect(response.range_key_element).to eq(1501)
     end
   end
 
@@ -45,26 +47,28 @@ describe DynamoDB::SuccessResponse do
             "created_at" => {"N" => "1321564309.99428"},
             "disabled"   => {"N" => "1"},
             "group_id"   => {"N" => "1"},
-            "person_id"  => {"N" => "1501"}
+            "person_id"  => {"N" => "1501"},
+            "pinned_at"  => {"NULL" => true}
           }
         ],
         "Count" => 1,
         "ConsumedCapacityUnits" => 0.5
       }
-      http_response = stub(Net::HTTPResponse, body: MultiJson.dump(body))
+      stub = stub_request(:post, "https://dynamodb.local").
+        to_return(status: 201, body: MultiJson.dump(body))
 
-      response = DynamoDB::SuccessResponse.new(http_response)
-      response.items[0]["name"].should == "John Smith"
-      response.items[0]["created_at"].should == 1321564309.99428
-      response.items[0]["disabled"].should == 0
-      response.items[0]["group_id"].should == 1
-      response.items[0]["person_id"].should == 1500
+      response = DynamoDB::SuccessResponse.new(stub.response)
+      expect(response.items[0]["name"]).to eq("John Smith")
+      expect(response.items[0]["created_at"]).to eq(1321564309.99428)
+      expect(response.items[0]["disabled"]).to eq(0)
+      expect(response.items[0]["group_id"]).to eq(1)
+      expect(response.items[0]["person_id"]).to eq(1500)
 
-      response.items[1]["name"].should == "Jane Smith"
-      response.items[1]["created_at"].should == 1321564309.99428
-      response.items[1]["disabled"].should == 1
-      response.items[1]["group_id"].should == 1
-      response.items[1]["person_id"].should == 1501
+      expect(response.items[1]["name"]).to eq("Jane Smith")
+      expect(response.items[1]["created_at"]).to eq(1321564309.99428)
+      expect(response.items[1]["disabled"]).to eq(1)
+      expect(response.items[1]["group_id"]).to eq(1)
+      expect(response.items[1]["person_id"]).to eq(1501)
     end
   end
 
@@ -91,19 +95,20 @@ describe DynamoDB::SuccessResponse do
       }
     }
 
-    http_response = stub(Net::HTTPResponse, body: MultiJson.dump(body))
+    stub = stub_request(:post, "https://dynamodb.local").
+      to_return(status: 201, body: MultiJson.dump(body))
 
-    response = DynamoDB::SuccessResponse.new(http_response)
+    response = DynamoDB::SuccessResponse.new(stub.response)
 
-    response.responses["table_name"][0]["text"].should == "hi"
-    response.responses["table_name"][0]["message_id"].should == 1000
-    response.responses["table_name"][0]["like_user_ids"].should == ["1", "2"]
+    expect(response.responses["table_name"][0]["text"]).to eq("hi")
+    expect(response.responses["table_name"][0]["message_id"]).to eq(1000)
+    expect(response.responses["table_name"][0]["like_user_ids"]).to eq(["1", "2"])
 
-    response.responses["table_name"][1]["text"].should == "hello"
-    response.responses["table_name"][1]["message_id"].should == 2000
-    response.responses["table_name"][1]["like_user_ids"].should == ["3", "4"]
+    expect(response.responses["table_name"][1]["text"]).to eq("hello")
+    expect(response.responses["table_name"][1]["message_id"]).to eq(2000)
+    expect(response.responses["table_name"][1]["like_user_ids"]).to eq(["3", "4"])
 
-    response.responses["other_table_name"][0]["text"].should == "goodbye"
+    expect(response.responses["other_table_name"][0]["text"]).to eq("goodbye")
   end
 
   describe "#item" do
@@ -114,18 +119,22 @@ describe DynamoDB::SuccessResponse do
           "created_at" => {"N" => "1321564309.99428"},
           "disabled"   => {"N" => "0"},
           "group_id"   => {"N" => "1"},
-          "person_id"  => {"N" => "1500"}
+          "person_id"  => {"N" => "1500"},
+          "pinned_at"  => {"NULL" => true}
         },
         "ConsumedCapacityUnits" => 0.5
       }
-      http_response = stub(Net::HTTPResponse, body: MultiJson.dump(body))
+      stub = stub_request(:post, "https://dynamodb.local").
+        to_return(status: 201, body: MultiJson.dump(body))
 
-      response = DynamoDB::SuccessResponse.new(http_response)
-      response.item["name"].should == "John Smith"
-      response.item["created_at"].should == 1321564309.99428
-      response.item["disabled"].should == 0
-      response.item["group_id"].should == 1
-      response.item["person_id"].should == 1500
+
+      response = DynamoDB::SuccessResponse.new(stub.response)
+      expect(response.item["name"]).to eq("John Smith")
+      expect(response.item["created_at"]).to eq(1321564309.99428)
+      expect(response.item["disabled"]).to eq(0)
+      expect(response.item["group_id"]).to eq(1)
+      expect(response.item["person_id"]).to eq(1500)
+      expect(response.item["pinned_at"]).to be_nil
     end
   end
 end
